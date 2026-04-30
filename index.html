@@ -17,24 +17,20 @@
             box-sizing: border-box;
         }
 
-        /* 
-           Crucial Fix: Changed 'overflow: hidden' to 'auto' 
-           and 'height' to 'min-height' so it scrolls on phones.
-        */
         body, html {
             min-height: 100vh;
             font-family: 'Roboto', sans-serif;
             background: url('images/background.jpg') no-repeat center center;
             background-size: cover;
-            background-attachment: fixed; /* Keep background static while scrolling */
+            background-attachment: fixed;
             background-color: #0f0f13; 
             color: white;
             overflow-x: hidden; 
             overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Dark overlay - must be fixed to stay during scroll */
+        /* Dark overlay */
         body::before {
             content: '';
             position: fixed;
@@ -44,8 +40,21 @@
         }
 
         /* Global cursor fix */
-        a, button, .cta-button {
+        a, button, .cta-button, .nav-links a {
             cursor: pointer !important;
+        }
+
+        /* 
+           FIXED NAVIGATION: 
+           By making the nav placeholder fixed, it doesn't occupy 
+           vertical space in the flex container, centering the content perfectly.
+        */
+        #nav-placeholder {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
         }
 
         .container {
@@ -53,7 +62,7 @@
             z-index: 1;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            min-height: 100vh; /* Takes full screen height */
         }
 
         /* --- HERO SECTION --- */
@@ -61,10 +70,10 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; /* Vertical centering */
+            align-items: center;     /* Horizontal centering */
             text-align: center;
-            padding: 80px 20px 40px 20px; /* Space for nav at top */
+            padding: 20px;           /* Balanced padding for the screen */
         }
 
         .glass-box {
@@ -101,20 +110,17 @@
             transition: all 0.3s ease;
         }
 
-        /* --- MEDIA QUERY FOR SMALL PHONES --- */
-        @media (max-width: 480px) {
+        /* --- MEDIA QUERY FOR MOBILE --- */
+        @media (max-width: 768px) {
             .glass-box {
                 padding: 1.5rem 1rem;
+                width: 90%;
             }
             .glass-box h1 {
                 font-size: 1.6rem;
             }
-            .hero {
-                padding-top: 100px;
-            }
             .cta-button {
-                width: 100%; /* Full width button on very small screens */
-                padding: 18px;
+                padding: 14px 28px;
             }
         }
     </style>
@@ -128,6 +134,7 @@
             <div class="glass-box">
                 <h1>Hosting deep conversations with the incredible and inspiring minds shaping the world of Bitcoin.</h1>
             </div>
+            <!-- Links to your official channel -->
             <a href="http://www.youtube.com/@MrMPodcast" target="_blank" rel="noopener noreferrer" class="cta-button">
                 Watch on YouTube
             </a>
@@ -140,6 +147,7 @@
             .then(res => res.text())
             .then(data => {
                 document.getElementById('nav-placeholder').innerHTML = data;
+                // Highlight active link if IDs exist in your navigation.html
                 const homeLink = document.getElementById('nav-link-home');
                 if(homeLink) homeLink.classList.add('active');
             })
