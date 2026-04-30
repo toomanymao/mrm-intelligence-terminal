@@ -23,17 +23,20 @@
         }
 
         body, html {
-            height: 100%;
+            /* Changed height to min-height and allowed vertical overflow */
+            min-height: 100vh;
             font-family: 'Roboto', sans-serif;
             background: url('images/background.jpg') no-repeat center center/cover;
-            background-color: #0f0f13; /* Matched to Dashboard background */
+            background-attachment: fixed; /* Keeps background still while scrolling */
+            background-color: #0f0f13; 
             color: white;
-            overflow: hidden;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-y: auto;   /* Allow vertical scroll */
         }
 
         body::before {
             content: '';
-            position: absolute;
+            position: fixed; /* Changed to fixed so it covers the whole scrollable area */
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.45);
             z-index: 0;
@@ -42,7 +45,7 @@
         .container {
             position: relative;
             z-index: 1;
-            height: 100%;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -55,12 +58,13 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 0 2rem;
+            padding: 4rem 2rem; /* Added top/bottom padding for mobile breathing room */
         }
 
         .glass-box {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px); /* Modern glass effect */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
             padding: 2.5rem 4rem;
             max-width: 750px;
             margin-bottom: 2rem;
@@ -79,7 +83,7 @@
 
         .cta-button {
             display: inline-block;
-            background-color: #f7931a; /* Matched to Bitcoin Orange */
+            background-color: #f7931a; 
             color: #000;
             text-decoration: none;
             padding: 14px 32px;
@@ -96,16 +100,27 @@
             background-color: #e5930e;
             transform: translateY(-2px);
         }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        @media (max-width: 768px) {
+            .glass-box {
+                padding: 1.5rem; /* Reduced padding for small screens */
+                margin-top: 2rem;
+            }
+            .glass-box h1 {
+                font-size: 1.6rem; /* Smaller text for mobile */
+            }
+            .hero {
+                padding: 6rem 1rem 3rem 1rem; /* More space for the nav at the top */
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 1. NAVIGATION PLACEHOLDER -->
     <div id="nav-placeholder"></div>
 
     <div class="container">
-        <!-- HEADER REMOVED: NOW LOADED VIA NAV-PLACEHOLDER -->
-
         <main class="hero">
             <div class="glass-box">
                 <h1>Hosting deep conversations with the incredible and inspiring minds shaping the world of Bitcoin.</h1>
@@ -114,14 +129,14 @@
         </main>
     </div>
 
-    <!-- 2. NAVIGATION LOADER SCRIPT -->
     <script>
         fetch('navigation.html')
             .then(res => res.text())
             .then(data => {
                 document.getElementById('nav-placeholder').innerHTML = data;
-                // Set Home as active on this page
-                document.getElementById('nav-link-home').classList.add('active');
+                // Safety check in case the element isn't in navigation.html yet
+                const homeLink = document.getElementById('nav-link-home');
+                if(homeLink) homeLink.classList.add('active');
             })
             .catch(err => console.error('Error loading navigation:', err));
     </script>
