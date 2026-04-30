@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. M Podcast | Institutional Intelligence</title>
+    
+    <!-- EXTERNAL RESOURCES -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #0f0f13;      
+            --card-bg: #18181f;       
+            --text-main: #f8fafc;     
+            --text-dim: #8b949e;      
+            --border: #2d333b;        
+            --btc-orange: #f7931a;    
+            --buy-color: #22c55e;     
+            --sell-color: #ef4444;    
+            --inactive-bar: #252830;  
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 40px 20px; }
+
+        .dashboard-main-title {
+            text-align: center;
+            font-size: 1.8rem;
+            letter-spacing: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 20px 0 40px 0;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .card { background: var(--card-bg); border-radius: 4px; padding: 24px; border: 1px solid var(--border); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .chart-header { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 16px; border-left: 3px solid var(--btc-orange); padding-left: 12px; font-weight: 700; letter-spacing: 1px; }
+
+        .top-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .price-display { font-size: 2.8rem; font-weight: 800; letter-spacing: -2px; line-height: 1; margin: 12px 0; }
+        .quote-display { font-size: 0.85rem; font-style: italic; line-height: 1.4; margin-top: 5px; }
+        .quote-author { font-size: 0.6rem; color: var(--btc-orange); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-top: 10px; display: block; }
+
+        .gauge-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        .gauge-container { position: relative; width: 180px; height: 100px; margin: 0 auto; }
+        #gauge-needle { transition: transform 1.5s cubic-bezier(0.1, 0.9, 0.2, 1.2); transform-origin: 90px 90px; }
+        #fng-val { font-size: 2.5rem; font-weight: 800; margin-top: -5px; letter-spacing: -2px; line-height: 1; }
+        #fng-status { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; margin-top: 8px; text-transform: uppercase; }
+
+        .filter-section { 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            background-color: var(--bg-color); 
+            padding-top: 10px; 
+            margin-bottom: 20px; 
+            padding-bottom: 12px; 
+            border-bottom: 1px solid var(--border); 
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.8); 
+            margin-left: -20px; 
+            margin-right: -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .filter-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
+        .filter-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-dim); padding: 8px 16px; cursor: pointer; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; border-radius: 4px; transition: 0.2s; }
+        .filter-btn.active { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
+        .filter-btn:hover:not(.active) { background: var(--border); color: var(--text-main); }
+
+        .diag-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .heavy-bar-bg { height: 48px; background: var(--bg-color); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); position: relative; display: flex; align-items: center; }
+        .heavy-bar-fill { height: 100%; transition: width 1s cubic-bezier(0.1, 0.9, 0.2, 1); position: absolute; z-index: 1; }
+        .heavy-bar-content { position: absolute; width: 100%; display: flex; justify-content: space-between; padding: 0 16px; box-sizing: border-box; font-weight: 800; font-size: 0.8rem; z-index: 2; text-transform: uppercase; }
+
+        .telemetry-widget { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin-top: 8px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; }
+
+        @media (max-width: 768px) {
+            .top-metrics { grid-template-columns: 1fr 1fr; }
+            .diag-row, .data-grid { grid-template-columns: 1fr; }
+            .dashboard-main-title { font-size: 1.2rem; letter-spacing: 4px; }
+        }
+        @media (max-width: 500px) { .top-metrics { grid-template-columns: 1fr; } .telemetry-widget { flex-direction: column; gap: 10px; text-align: center; } }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVIGATION PLACEHOLDER -->
+    <div id="nav-placeholder"></div>
+
+    <div class="container">
+        <h1 class="dashboard-main-title">INSTITUTIONAL INTELLIGENCE TERMINAL</h1>
+
+        <!-- ALL METRICS AND GRIDS REMAIN UNCHANGED -->
+        <!-- ... (Keep your metrics and data-grids here) ... -->
+
+        <div class="top-metrics">
+            <div class="card">
+                <div class="chart-header">BTC / USD Spot</div>
+                <div class="price-display mono" id="btc-price">$---,---.--</div>
+                <div id="btc-change" class="mono" style="font-weight: 700; font-size: 1.2rem;">+0.00%</div>
+            </div>
+            <div class="card">
+                <div class="chart-header">Gold Parity Matrix</div>
+                <div class="heavy-bar-bg" style="height: 54px; margin-top: 10px;">
+                    <div class="heavy-bar-content"><span>VS GOLD</span><span id="gold-perc" class="mono">0%</span></div>
+                    <div id="gold-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="chart-header">Wisdom on the Wire</div>
+                <div id="quote-box" class="quote-display">"..."</div>
+                <span id="quote-author" class="quote-author"></span>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div class="chart-header" style="border:none; padding:0; margin-bottom: 10px; text-align: center;">Sentiment Circuit</div>
+                <div class="gauge-wrapper">
+                    <div class="gauge-container">
+                        <svg viewBox="0 0 180 110" style="width: 100%; height: 100%;">
+                            <defs>
+                                <linearGradient id="fngGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="var(--sell-color)" />
+                                    <stop offset="50%" stop-color="var(--btc-orange)" />
+                                    <stop offset="100%" stop-color="var(--buy-color)" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 90 A 70 70 0 0 1 160 90" fill="none" stroke="url(#fngGrad)" stroke-width="12" stroke-linecap="round" />
+                            <text fill="var(--text-dim)" font-size="10" font-weight="800" x="15" y="105" text-anchor="middle">0</text>
+                            <text fill="var(--text-dim)" font-size="10" font-weight="800" x="90" y="12" text-anchor="middle">50</text>
+                            <text fill="var(--text-dim)" font-size="10" font-weight="800" x="165" y="105" text-anchor="middle">100</text>
+                            <polygon id="gauge-needle" points="90,90 87,35 93,35" fill="var(--text-main)" />
+                            <circle cx="90" cy="90" r="7" fill="var(--text-main)" />
+                        </svg>
+                    </div>
+                    <div id="fng-val" class="mono">--</div>
+                    <div id="fng-status">SYNCING</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-container">
+                <button id="btn-7d" class="filter-btn active" onclick="updateDashboard('7d', this)">7 Days</button>
+                <button id="btn-30d" class="filter-btn" onclick="updateDashboard('30d', this)">30 Days</button>
+                <button id="btn-3m" class="filter-btn" onclick="updateDashboard('3m', this)">3 Months</button>
+                <button id="btn-6m" class="filter-btn" onclick="updateDashboard('6m', this)">6 Months</button>
+                <button id="btn-all" class="filter-btn" onclick="updateDashboard('all', this)">Since Genesis</button>
+            </div>
+        </div>
+
+        <div class="diag-row">
+            <div class="card">
+                <div class="chart-header">OTC Liquidity Flow</div>
+                <div class="heavy-bar-bg" style="margin-top: 10px;">
+                    <div class="heavy-bar-content"><span>EST. EXHAUSTION: <span id="otc-dry">JUNE 2026</span></span><span id="otc-perc" class="mono">0%</span></div>
+                    <div id="otc-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
+                </div>
+                <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 12px; font-weight: 700; text-align: right;">BALANCE: <span id="otc-bal" class="mono">0</span> BTC</div>
+            </div>
+            <div class="card">
+                <div class="chart-header">Dominance</div>
+                <div class="heavy-bar-bg" style="margin-top: 10px;">
+                    <div class="heavy-bar-content"><span>BTC DOM</span><span id="dom-val" class="mono">0%</span></div>
+                    <div id="dom-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-grid">
+            <div class="card"><div class="chart-header">Institutional Flow (BTC)</div><div id="inst-list"></div></div>
+            <div class="card"><div class="chart-header">Sovereign Treasury Holdings</div><div id="nation-list"></div></div>
+        </div>
+        <div class="data-grid">
+            <div class="card"><div class="chart-header" id="macro-title">Supply Distribution</div><div id="macro-list"></div></div>
+            <div class="card"><div class="chart-header">Miner Inventory & Hashrate Heat</div><div id="miner-list"></div></div>
+        </div>
+
+        <div class="telemetry-widget mono">
+            <span>SOURCE: BINANCE | ALTERNATIVE.ME | ON-CHAIN AGG.</span>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <span style="background: var(--inactive-bar); color: var(--text-main); padding: 3px 6px; border-radius: 3px; font-size: 0.55rem; letter-spacing: 2px;">BETA</span>
+                <span id="sync-stamp">LIVE SYNC: --:--:--</span>
+            </div>
+        </div>
+    </div>
+
+<script>
+    /* 2. NAVIGATION LOADER SCRIPT */
+    fetch('navigation.html')
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('nav-placeholder').innerHTML = data;
+            // Set Dashboard as active
+            document.getElementById('nav-link-dashboard').classList.add('active');
+        });
+
+    /* ALL OTHER DASHBOARD LOGIC (Binance WebSocket, updateDashboard, etc.) */
+    const quotes = [
+        { text: "If you don't believe me or don't get it, I don't have time to try to convince you, sorry.", author: "Satoshi Nakamoto" },
+        { text: "Bitcoin is a bank in cyberspace, run by incorruptible software.", author: "Michael Saylor" },
+        { text: "The possibility of generating coins today at a cost of cents may be a good bet.", author: "Hal Finney" },
+        { text: "In an inflationary world, Bitcoin is the only way to protect your time.", author: "Jeff Booth" },
+        { text: "Fix the money, fix the world.", author: "Bitcoin Adage" }
+    ];
+
+    const instEntities = ['Strategy (MSTR)', 'Spot ETFs (Combined)', 'Metaplanet', 'Semler Sci.', 'Smart Web UK'];
+    const nationEntities = ['US Government', 'Bhutan', 'El Salvador', 'Russia'];
+    const supplyEntities = ['Retail Base', 'Institutions', 'Sovereign', 'Satoshi Stack', 'Lost Coins'];
+    const minerEntities = ['Foundry Pool', 'Antpool', 'MARA Holdings', 'RIOT Platforms', 'Hashrate (EH/s)'];
+
+    let socket = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+    socket.onmessage = (e) => {
+        let d = JSON.parse(e.data); 
+        let p = parseFloat(d.c); 
+        let change = parseFloat(d.P);
+        document.getElementById('btc-price').innerText = '$' + p.toLocaleString(undefined, {minimumFractionDigits:2});
+        document.getElementById('btc-change').innerText = (change >= 0 ? '+' : '') + d.P + '%';
+        document.getElementById('btc-change').style.color = change >= 0 ? 'var(--buy-color)' : 'var(--sell-color)';
+        let mcap = (p * 19980000) / 1e12;
+        document.getElementById('gold-perc').innerText = ((mcap / 16.5) * 100).toFixed(1) + '%';
+        document.getElementById('gold-fill').style.width = ((mcap / 16.5) * 100).toFixed(1) + '%';
+        const now = new Date();
+        document.getElementById('sync-stamp').innerText = `LIVE SYNC: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    };
+
+    const db = {
+        'all': { label: "Since Genesis", otc: { fill: '12%', bal: '82,400', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 818334, 'Spot ETFs (Combined)': 1085420, 'Metaplanet': 1142, 'Semler Sci.': 929, 'Smart Web UK': 612}, supply: {'Retail Base': 12750000, 'Institutions': 1600000, 'Sovereign': 650000, 'Satoshi Stack': 1100000, 'Lost Coins': 2600000}, nation: {'US Government': 213246, 'Bhutan': 13025, 'El Salvador': 5724, 'Russia': 25000}, miner: {'Foundry Pool': 428000, 'Antpool': 312000, 'MARA Holdings': 24500, 'RIOT Platforms': 18200, 'Hashrate (EH/s)': 842}, dom: "54.2%" },
+        '6m': { label: "6 Months", otc: { fill: '18%', bal: '124,500', dry: 'AUG 2026' }, inst: {'Strategy (MSTR)': 215400, 'Spot ETFs (Combined)': 342100}, supply: {'Institutions': 397500, 'Sovereign': 12000, 'Retail Base': 125000}, nation: {'El Salvador': 180, 'Russia': 4500}, miner: {'MARA Holdings': 5200, 'RIOT Platforms': 1200, 'Hashrate (EH/s)': 142}, dom: "51.4%" },
+        '3m': { label: "3 Months", otc: { fill: '15%', bal: '102,000', dry: 'JULY 2026' }, inst: {'Strategy (MSTR)': 98000, 'Spot ETFs (Combined)': 145000}, supply: {'Institutions': 145000, 'Retail Base': 82000}, nation: {'El Salvador': 90, 'Bhutan': 450}, miner: {'MARA Holdings': 2100, 'RIOT Platforms': 450, 'Hashrate (EH/s)': 68}, dom: "52.9%" },
+        '30d': { label: "30 Days", otc: { fill: '13%', bal: '88,000', dry: 'JUNE 2026' }, inst: {'Spot ETFs (Combined)': 32400}, supply: {'Retail Base': 68635, 'Sovereign': 1200, 'Institutions': -22000}, nation: {'El Salvador': 30}, miner: {'Foundry Pool': -4500, 'Antpool': -8200, 'RIOT Platforms': -120, 'Hashrate (EH/s)': -12}, dom: "53.5%" },
+        '7d': { label: "7 Days", otc: { fill: '11%', bal: '78,200', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 3273, 'Spot ETFs (Combined)': 14285}, supply: {'Retail Base': -2100, 'Institutions': 14285, 'Sovereign': 45}, nation: {'El Salvador': 7}, miner: {'Foundry Pool': -1200, 'MARA Holdings': 250, 'RIOT Platforms': 15, 'Hashrate (EH/s)': 2}, dom: "53.8%" }
+    };
+
+    function updateDashboard(period, btn) {
+        const d = db[period] || db['all'];
+        if (btn) { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        document.getElementById('otc-fill').style.width = d.otc.fill; 
+        document.getElementById('otc-perc').innerText = d.otc.fill;
+        document.getElementById('otc-bal').innerText = d.otc.bal; 
+        document.getElementById('otc-dry').innerText = d.otc.dry;
+        document.getElementById('dom-val').innerText = d.dom; 
+        document.getElementById('dom-fill').style.width = d.dom;
+
+        const renderItems = (containerId, roster, dataMap, allTimeMap) => {
+            const el = document.getElementById(containerId); el.innerHTML = '';
+            roster.forEach(name => {
+                const isImm = (name === 'Satoshi Stack' || name === 'Lost Coins');
+                const total = allTimeMap[name] || 1;
+                let val = dataMap[name] || 0;
+                const displayNum = isImm ? total : ((period === 'all') ? total : val);
+                const sign = (displayNum > 0 && period !== 'all' && !isImm) ? '+' : '';
+                let unit = name.includes('EH/s') ? '' : ' BTC';
+                let perc = isImm ? 100 : (Math.abs(displayNum) / total) * 100;
+                if (perc > 100) perc = 100; 
+                let color = 'var(--inactive-bar)';
+                if (period !== 'all' && !isImm) {
+                    if (displayNum > 0) color = 'var(--buy-color)';
+                    else if (displayNum < 0) color = 'var(--sell-color)';
+                }
+                el.innerHTML += `<div class="heavy-bar-container"><div class="heavy-bar-bg"><div class="heavy-bar-content"><span>${name}</span><span class="mono">${sign}${displayNum.toLocaleString()}${unit}</span></div><div class="heavy-bar-fill" style="width: ${perc}%; background: ${color}; opacity: 0.9;"></div></div></div>`;
+            });
+        };
+        renderItems('inst-list', instEntities, d.inst, db['all'].inst);
+        renderItems('nation-list', nationEntities, d.nation, db['all'].nation);
+        renderItems('macro-list', supplyEntities, d.supply, db['all'].supply);
+        renderItems('miner-list', minerEntities, d.miner, db['all'].miner);
+        document.getElementById('macro-title').innerText = period === 'all' ? "Supply Distribution" : `Net Distribution (${d.label.toUpperCase()})`;
+    }
+
+    async function fetchFNG() {
+        try {
+            const res = await fetch('https://api.alternative.me/fng/');
+            const d = await res.json(); const v = parseInt(d.data[0].value);
+            document.getElementById('gauge-needle').style.transform = `rotate(${(v * 1.8) - 90}deg)`;
+            document.getElementById('fng-val').innerText = v;
+            document.getElementById('fng-status').innerText = d.data[0].value_classification;
+        } catch (e) {}
+    }
+
+    window.onload = () => { 
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        document.getElementById('quote-box').innerText = `"${randomQuote.text}"`;
+        document.getElementById('quote-author').innerText = randomQuote.author;
+        fetchFNG(); setInterval(fetchFNG, 600000); updateDashboard('7d', document.getElementById('btn-7d')); 
+    };
+</script>
+</body>
+</html>

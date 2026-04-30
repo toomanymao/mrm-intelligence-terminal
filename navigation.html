@@ -1,0 +1,76 @@
+<!-- MR. M PODCAST NAVIGATION COMPONENT -->
+<style>
+    .nav-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 5rem;
+        background: transparent;
+        position: relative;
+        z-index: 1000;
+        font-family: 'Roboto', sans-serif;
+        box-sizing: border-box;
+    }
+
+    .nav-wrapper a, .nav-wrapper i { cursor: pointer !important; }
+    .nav-logo-img { height: 40px; width: auto; display: block; }
+
+    .nav-menu a {
+        color: white;
+        text-decoration: none;
+        margin: 0 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 300;
+        opacity: 0.9;
+        transition: opacity 0.3s;
+        display: inline-block;
+    }
+
+    .nav-menu a:hover { opacity: 1; }
+    .nav-menu a.active { 
+        border-bottom: 1px solid white; 
+        padding-bottom: 3px; 
+        opacity: 1; 
+        font-weight: 700; 
+    }
+
+    .nav-socials a {
+        color: white;
+        text-decoration: none;
+        margin-left: 1.2rem;
+        display: inline-block;
+        line-height: 1;
+    }
+
+    .nav-socials i {
+        font-size: 1rem;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+
+    .nav-socials a:hover i { opacity: 1; }
+
+    @media (max-width: 768px) {
+        .nav-wrapper { flex-direction: column; gap: 1.5rem; padding: 2rem; }
+    }
+</style>
+
+<header class="nav-wrapper">
+    <a href="/" class="nav-logo">
+        <img src="images/New_Logo.png" alt="Mr. M Podcast Logo" class="nav-logo-img">
+    </a>
+    <nav class="nav-menu">
+        <a href="/" id="nav-link-home">Home</a>
+        <a href="dashboard.html" id="nav-link-dashboard">Dashboard</a>
+    </nav>
+    <div class="nav-socials">
+        <a href="http://www.youtube.com/@MrMPodcast" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+        <a href="http://twitter.com/mrmpodcast" target="_blank"><i class="fa-brands fa-twitter"></i></a>
+        <a href="http://instagram.com/mrmpodcast" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://www.facebook.com/share/18515k9rUK/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="http://tiktok.com/@mrmpodcast" target="_blank"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="http://open.spotify.com/show/5yffW0Sc2SuOx4BR1K4Iew" target="_blank"><i class="fa-brands fa-spotify"></i></a>
+        <a href="https://podcasts.apple.com/us/podcast/mr-m-podcast/id1615148625" target="_blank"><i class="fa-solid fa-podcast"></i></a>
+    </div>
+</header>

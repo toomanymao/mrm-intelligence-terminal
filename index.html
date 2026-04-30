@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. M Podcast</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Roboto:wght@300;400;700&family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- GLOBAL RESET --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* CURSOR OVERRIDE */
+        a, a *, button, .cta-button {
+            cursor: pointer !important;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            background: url('images/background.jpg') no-repeat center center/cover;
+            background-color: #0f0f13; /* Matched to Dashboard background */
+            color: white;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        .glass-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px); /* Modern glass effect */
+            padding: 2.5rem 4rem;
+            max-width: 750px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .glass-box h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
+            font-size: 2.5rem;
+            line-height: 1.4;
+            margin: 0;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #f7931a; /* Matched to Bitcoin Orange */
+            color: #000;
+            text-decoration: none;
+            padding: 14px 32px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 4px;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: #e5930e;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. NAVIGATION PLACEHOLDER -->
+    <div id="nav-placeholder"></div>
+
+    <div class="container">
+        <!-- HEADER REMOVED: NOW LOADED VIA NAV-PLACEHOLDER -->
+
+        <main class="hero">
+            <div class="glass-box">
+                <h1>Hosting deep conversations with the incredible and inspiring minds shaping the world of Bitcoin.</h1>
+            </div>
+            <a href="http://www.youtube.com/@MrMPodcast" target="_blank" rel="noopener noreferrer" class="cta-button">Watch on YouTube</a>
+        </main>
+    </div>
+
+    <!-- 2. NAVIGATION LOADER SCRIPT -->
+    <script>
+        fetch('navigation.html')
+            .then(res => res.text())
+            .then(data => {
+                document.getElementById('nav-placeholder').innerHTML = data;
+                // Set Home as active on this page
+                document.getElementById('nav-link-home').classList.add('active');
+            })
+            .catch(err => console.error('Error loading navigation:', err));
+    </script>
+
+</body>
+</html>
