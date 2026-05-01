@@ -9,6 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ED757EV8FX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-ED757EV8FX');
+    </script>
+
     <style>
         :root {
             --bg-color: #0f0f13;      
@@ -538,7 +547,7 @@
                 <span>QUESTIONS? DM <a href="https://x.com/mrmpodcast" target="_blank" style="color: var(--btc-orange); text-decoration: none; letter-spacing: 1px;">@mrmpodcast</a> ON X</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <span style="color: var(--text-dim);">VER: 1.1.4-BETA</span>
+                <span style="color: var(--text-dim);">VER: 1.1.5-BETA</span>
                 <span style="background: var(--inactive-bar); color: var(--text-main); padding: 3px 6px; border-radius: 3px; font-size: 0.55rem; letter-spacing: 2px;">BETA</span>
                 <span id="sync-stamp">LIVE SYNC: --:--:--</span>
             </div>
@@ -741,11 +750,17 @@
         document.getElementById('quote-box').innerText = `"${randomQuote.text}"`;
         document.getElementById('quote-author').innerText = randomQuote.author;
         
-        // PAGE VIEW COUNTER LOGIC
+        // PAGE VIEW COUNTER — local count + GA event
         let views = localStorage.getItem('mrm_dashboard_views') || 0;
         views = parseInt(views) + 1;
         localStorage.setItem('mrm_dashboard_views', views);
         document.getElementById('view-count').innerText = views.toLocaleString();
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'page_view', {
+                page_title: 'BTC Dashboard',
+                page_location: window.location.href
+            });
+        }
         
         fetchFNG(); 
         setInterval(fetchFNG, 600000); 
