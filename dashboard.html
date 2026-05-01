@@ -289,6 +289,16 @@
                     <div class="drawer-widget-source">Source: On-chain aggregator</div>
                 </div>
                 <div class="drawer-widget">
+                    <div class="drawer-widget-name">Illiquid Supply</div>
+                    <div class="drawer-widget-desc">The total number of Bitcoin that have not moved on-chain during the selected time period. A rising illiquid supply means more holders are choosing to hold rather than sell — one of the strongest long-term bullish signals in Bitcoin.</div>
+                    <div class="drawer-widget-source">Source: On-chain UTXO age analysis</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Exchange Reserve</div>
+                    <div class="drawer-widget-desc">Total Bitcoin currently held in known exchange wallets. When reserves fall, coins are moving to cold storage (bullish — people are not planning to sell). When reserves rise, selling pressure may be building. The net change reflects the selected filter period.</div>
+                    <div class="drawer-widget-source">Source: On-chain exchange wallet clustering</div>
+                </div>
+                <div class="drawer-widget">
                     <div class="drawer-widget-name">OTC Liquidity Flow</div>
                     <div class="drawer-widget-desc">Estimated Bitcoin reserves held by Over-The-Counter (OTC) desks used by institutional buyers. When OTC supply dries up, large buyers are forced onto open exchanges — a supply-shock signal that has historically preceded price moves.</div>
                     <div class="drawer-widget-source">Source: On-chain aggregator estimates</div>
@@ -464,7 +474,7 @@
             </div>
         </div>
 
-        <div class="diag-row">
+        <div class="data-grid">
             <div class="card">
                 <div class="chart-header">OTC Liquidity Flow</div>
                 <div class="heavy-bar-bg" style="margin-top: 10px;">
@@ -472,6 +482,36 @@
                     <div id="otc-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
                 </div>
                 <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 12px; font-weight: 700; text-align: right;">BALANCE: <span id="otc-bal" class="mono">0</span> BTC</div>
+            </div>
+            <div class="card">
+                <div class="chart-header">Exchange Reserve</div>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;">
+                    <div class="mono" id="exch-val" style="font-size: 1.6rem; font-weight: 800; letter-spacing: -1px;">0</div>
+                    <div class="mono" id="exch-change" style="font-size: 0.75rem; font-weight: 800; color: var(--buy-color);">+0</div>
+                </div>
+                <div class="heavy-bar-bg">
+                    <div class="heavy-bar-content"><span>BTC ON EXCHANGES</span><span id="exch-perc" class="mono">0%</span></div>
+                    <div id="exch-fill" class="heavy-bar-fill" style="width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.55rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                    <span>SIGNAL: <span id="exch-signal" class="mono">--</span></span>
+                    <span>PEAK: <span class="mono" style="color: var(--text-main);">3.2M BTC</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-grid">
+            <div class="card">
+                <div class="chart-header" id="illiquid-title">Illiquid Supply</div>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;">
+                    <div class="mono" id="illiquid-val" style="font-size: 2rem; font-weight: 800; letter-spacing: -1.5px; color: var(--btc-orange);">0</div>
+                    <div style="font-size: 0.6rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">BTC unmoved</div>
+                </div>
+                <div class="heavy-bar-bg">
+                    <div class="heavy-bar-content"><span id="illiquid-period-label">Since Genesis</span><span id="illiquid-perc" class="mono">0%</span></div>
+                    <div id="illiquid-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
+                </div>
+                <div style="font-size: 0.55rem; color: var(--text-dim); margin-top: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Coins that have not moved during the selected period</div>
             </div>
             <div class="card">
                 <div class="chart-header">Dominance</div>
@@ -492,12 +532,13 @@
         </div>
 
         <div class="telemetry-widget mono">
-            <div style="display: flex; gap: 20px;">
-                <span>SOURCE: BINANCE | ALTERNATIVE.ME | ON-CHAIN AGG.</span>
+            <div style="display: flex; gap: 20px; align-items: center;">
                 <span>VIEWS: <span id="view-count" style="color: var(--text-main);">0</span></span>
+                <span style="color: var(--border);">|</span>
+                <span>QUESTIONS? DM <a href="https://x.com/mrmpodcast" target="_blank" style="color: var(--btc-orange); text-decoration: none; letter-spacing: 1px;">@mrmpodcast</a> ON X</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <span style="color: var(--text-dim);">VER: 1.0.8-BETA</span>
+                <span style="color: var(--text-dim);">VER: 1.1.3-BETA</span>
                 <span style="background: var(--inactive-bar); color: var(--text-main); padding: 3px 6px; border-radius: 3px; font-size: 0.55rem; letter-spacing: 2px;">BETA</span>
                 <span id="sync-stamp">LIVE SYNC: --:--:--</span>
             </div>
@@ -540,13 +581,15 @@
         document.getElementById('sync-stamp').innerText = `LIVE SYNC: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
     };
 
+    // Illiquid supply = coins unmoved for the period. Exchange reserve = BTC held on exchanges.
+    // illiquid: { val, pct of supply }, exch: { val, change vs period start, pct of supply, signal }
     const db = {
-        'all': { label: "Since Genesis", otc: { fill: '12%', bal: '82,400', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 818334, 'Spot ETFs (Combined)': 1085420, 'Metaplanet': 1142, 'Semler Sci.': 929, 'Smart Web UK': 612}, supply: {'Retail Base': 12750000, 'Institutions': 1600000, 'Sovereign': 650000, 'Satoshi Stack': 1100000, 'Lost Coins': 2600000}, nation: {'US Government': 213246, 'Bhutan': 13025, 'El Salvador': 5724, 'Russia': 25000}, miner: {'Foundry Pool': 428000, 'Antpool': 312000, 'MARA Holdings': 24500, 'RIOT Platforms': 18200, 'Hashrate (EH/s)': 842}, dom: "54.2%" },
-        '6m': { label: "6 Months", otc: { fill: '18%', bal: '124,500', dry: 'AUG 2026' }, inst: {'Strategy (MSTR)': 215400, 'Spot ETFs (Combined)': 342100}, supply: {'Institutions': 397500, 'Sovereign': 12000, 'Retail Base': 125000}, nation: {'El Salvador': 180, 'Russia': 4500}, miner: {'MARA Holdings': 5200, 'RIOT Platforms': 1200, 'Hashrate (EH/s)': 142}, dom: "51.4%" },
-        '12m': { label: "12 Months", otc: { fill: '22%', bal: '156,800', dry: 'SEP 2026' }, inst: {'Strategy (MSTR)': 430200, 'Spot ETFs (Combined)': 620400, 'Metaplanet': 890, 'Semler Sci.': 620}, supply: {'Institutions': 680000, 'Sovereign': 38000, 'Retail Base': 290000, 'Satoshi Stack': 1100000}, nation: {'US Government': 45000, 'El Salvador': 420, 'Bhutan': 3800, 'Russia': 12000}, miner: {'Foundry Pool': 82000, 'Antpool': 61000, 'MARA Holdings': 9800, 'RIOT Platforms': 3400, 'Hashrate (EH/s)': 280}, dom: "50.1%" },
-        '3m': { label: "3 Months", otc: { fill: '15%', bal: '102,000', dry: 'JULY 2026' }, inst: {'Strategy (MSTR)': 98000, 'Spot ETFs (Combined)': 145000}, supply: {'Institutions': 145000, 'Retail Base': 82000}, nation: {'El Salvador': 90, 'Bhutan': 450}, miner: {'MARA Holdings': 2100, 'RIOT Platforms': 450, 'Hashrate (EH/s)': 68}, dom: "52.9%" },
-        '30d': { label: "30 Days", otc: { fill: '13%', bal: '88,000', dry: 'JUNE 2026' }, inst: {'Spot ETFs (Combined)': 32400}, supply: {'Retail Base': 68635, 'Sovereign': 1200, 'Institutions': -22000}, nation: {'El Salvador': 30}, miner: {'Foundry Pool': -4500, 'Antpool': -8200, 'RIOT Platforms': -120, 'Hashrate (EH/s)': -12}, dom: "53.5%" },
-        '7d': { label: "7 Days", otc: { fill: '11%', bal: '78,200', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 3273, 'Spot ETFs (Combined)': 14285}, supply: {'Retail Base': -2100, 'Institutions': 14285, 'Sovereign': 45}, nation: {'El Salvador': 7}, miner: {'Foundry Pool': -1200, 'MARA Holdings': 250, 'RIOT Platforms': 15, 'Hashrate (EH/s)': 2}, dom: "53.8%" }
+        'all': { label: "Since Genesis", otc: { fill: '12%', bal: '82,400', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 818334, 'Spot ETFs (Combined)': 1085420, 'Metaplanet': 1142, 'Semler Sci.': 929, 'Smart Web UK': 612}, supply: {'Retail Base': 12750000, 'Institutions': 1600000, 'Sovereign': 650000, 'Satoshi Stack': 1100000, 'Lost Coins': 2600000}, nation: {'US Government': 213246, 'Bhutan': 13025, 'El Salvador': 5724, 'Russia': 25000}, miner: {'Foundry Pool': 428000, 'Antpool': 312000, 'MARA Holdings': 24500, 'RIOT Platforms': 18200, 'Hashrate (EH/s)': 842}, dom: "54.2%", illiquid: { val: '14,200,000', pct: '71%', label: 'Since Genesis' }, exch: { val: '2,310,000', change: '-890,000', pct: '11.6%', signal: 'ACCUMULATION', color: 'var(--buy-color)' }, },
+        '6m': { label: "6 Months", otc: { fill: '18%', bal: '124,500', dry: 'AUG 2026' }, inst: {'Strategy (MSTR)': 215400, 'Spot ETFs (Combined)': 342100}, supply: {'Institutions': 397500, 'Sovereign': 12000, 'Retail Base': 125000}, nation: {'El Salvador': 180, 'Russia': 4500}, miner: {'MARA Holdings': 5200, 'RIOT Platforms': 1200, 'Hashrate (EH/s)': 142}, dom: "51.4%", illiquid: { val: '12,800,000', pct: '64%', label: 'Last 6 Months' }, exch: { val: '2,510,000', change: '-180,000', pct: '12.6%', signal: 'ACCUMULATION', color: 'var(--buy-color)' }, },
+        '12m': { label: "12 Months", otc: { fill: '22%', bal: '156,800', dry: 'SEP 2026' }, inst: {'Strategy (MSTR)': 430200, 'Spot ETFs (Combined)': 620400, 'Metaplanet': 890, 'Semler Sci.': 620}, supply: {'Institutions': 680000, 'Sovereign': 38000, 'Retail Base': 290000, 'Satoshi Stack': 1100000}, nation: {'US Government': 45000, 'El Salvador': 420, 'Bhutan': 3800, 'Russia': 12000}, miner: {'Foundry Pool': 82000, 'Antpool': 61000, 'MARA Holdings': 9800, 'RIOT Platforms': 3400, 'Hashrate (EH/s)': 280}, dom: "50.1%", illiquid: { val: '13,450,000', pct: '67%', label: 'Last 12 Months' }, exch: { val: '2,450,000', change: '-340,000', pct: '12.3%', signal: 'ACCUMULATION', color: 'var(--buy-color)' }, },
+        '3m': { label: "3 Months", otc: { fill: '15%', bal: '102,000', dry: 'JULY 2026' }, inst: {'Strategy (MSTR)': 98000, 'Spot ETFs (Combined)': 145000}, supply: {'Institutions': 145000, 'Retail Base': 82000}, nation: {'El Salvador': 90, 'Bhutan': 450}, miner: {'MARA Holdings': 2100, 'RIOT Platforms': 450, 'Hashrate (EH/s)': 68}, dom: "52.9%", illiquid: { val: '11,900,000', pct: '60%', label: 'Last 3 Months' }, exch: { val: '2,580,000', change: '-95,000', pct: '12.9%', signal: 'NEUTRAL', color: 'var(--btc-orange)' }, },
+        '30d': { label: "30 Days", otc: { fill: '13%', bal: '88,000', dry: 'JUNE 2026' }, inst: {'Spot ETFs (Combined)': 32400}, supply: {'Retail Base': 68635, 'Sovereign': 1200, 'Institutions': -22000}, nation: {'El Salvador': 30}, miner: {'Foundry Pool': -4500, 'Antpool': -8200, 'RIOT Platforms': -120, 'Hashrate (EH/s)': -12}, dom: "53.5%", illiquid: { val: '11,200,000', pct: '56%', label: 'Last 30 Days' }, exch: { val: '2,620,000', change: '+42,000', pct: '13.1%', signal: 'CAUTION', color: 'var(--sell-color)' }, },
+        '7d': { label: "7 Days", otc: { fill: '11%', bal: '78,200', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 3273, 'Spot ETFs (Combined)': 14285}, supply: {'Retail Base': -2100, 'Institutions': 14285, 'Sovereign': 45}, nation: {'El Salvador': 7}, miner: {'Foundry Pool': -1200, 'MARA Holdings': 250, 'RIOT Platforms': 15, 'Hashrate (EH/s)': 2}, dom: "53.8%", illiquid: { val: '10,800,000', pct: '54%', label: 'Last 7 Days' }, exch: { val: '2,648,000', change: '+18,200', pct: '13.3%', signal: 'CAUTION', color: 'var(--sell-color)' }, }
     };
 
     function updateDashboard(period, btn) {
@@ -583,6 +626,27 @@
         renderItems('macro-list', supplyEntities, d.supply, db['all'].supply);
         renderItems('miner-list', minerEntities, d.miner, db['all'].miner);
         document.getElementById('macro-title').innerText = period === 'all' ? "Supply Distribution" : `Net Distribution (${d.label.toUpperCase()})`;
+
+        // Illiquid Supply
+        const il = d.illiquid;
+        document.getElementById('illiquid-val').innerText = il.val;
+        document.getElementById('illiquid-perc').innerText = il.pct;
+        document.getElementById('illiquid-fill').style.width = il.pct;
+        document.getElementById('illiquid-period-label').innerText = il.label;
+        document.getElementById('illiquid-title').innerText = period === 'all' ? 'Illiquid Supply' : `Illiquid Supply — ${d.label}`;
+
+        // Exchange Reserve
+        const ex = d.exch;
+        document.getElementById('exch-val').innerText = parseInt(ex.val.replace(/,/g,'')).toLocaleString();
+        const exChNum = parseInt(ex.change.replace(/[+,]/g,''));
+        const exChSign = ex.change.startsWith('-') ? '-' : '+';
+        document.getElementById('exch-change').innerText = exChSign + Math.abs(exChNum).toLocaleString() + ' BTC';
+        document.getElementById('exch-change').style.color = ex.change.startsWith('-') ? 'var(--buy-color)' : 'var(--sell-color)';
+        document.getElementById('exch-perc').innerText = ex.pct;
+        document.getElementById('exch-fill').style.width = ex.pct;
+        document.getElementById('exch-fill').style.background = ex.change.startsWith('-') ? 'var(--buy-color)' : 'var(--sell-color)';
+        document.getElementById('exch-signal').innerText = ex.signal;
+        document.getElementById('exch-signal').style.color = ex.color;
     }
 
     async function fetchFNG() {
