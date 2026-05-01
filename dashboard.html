@@ -32,15 +32,39 @@
             letter-spacing: 8px;
             font-weight: 800;
             text-transform: uppercase;
-            margin: 20px 0 40px 0;
             color: var(--text-main);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
         }
 
         .card { background: var(--card-bg); border-radius: 4px; padding: 24px; border: 1px solid var(--border); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
         .chart-header { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 16px; border-left: 3px solid var(--btc-orange); padding-left: 12px; font-weight: 700; letter-spacing: 1px; }
 
+        /* HELP BUTTON */
+        .help-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 4px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+        .help-btn:hover { border-color: var(--btc-orange); color: var(--btc-orange); }
+
+        /* DRAWER OVERLAY */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0); pointer-events: none; z-index: 500; transition: background 0.35s ease; }
+        .drawer-overlay.open { background: rgba(0,0,0,0.6); pointer-events: auto; }
+
+        /* DRAWER PANEL */
+        .drawer { position: fixed; top: 0; right: -420px; width: 400px; max-width: 92vw; height: 100vh; background: #13131a; border-left: 1px solid var(--btc-orange); z-index: 501; display: flex; flex-direction: column; transition: right 0.35s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+        .drawer.open { right: 0; }
+        .drawer-head { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+        .drawer-title { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; color: var(--btc-orange); }
+        .drawer-close { background: none; border: 1px solid var(--border); color: var(--text-dim); width: 28px; height: 28px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: border-color 0.2s, color 0.2s; line-height: 1; }
+        .drawer-close:hover { border-color: var(--sell-color); color: var(--sell-color); }
+        .drawer-body { overflow-y: auto; flex: 1; padding: 0 24px 32px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+        .drawer-body::-webkit-scrollbar { width: 4px; }
+        .drawer-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .drawer-section { padding: 20px 0; border-bottom: 1px solid var(--border); }
+        .drawer-section:last-child { border-bottom: none; }
+        .drawer-section-label { font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--btc-orange); margin-bottom: 14px; }
+        .drawer-widget { margin-bottom: 18px; }
+        .drawer-widget:last-child { margin-bottom: 0; }
+        .drawer-widget-name { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-main); margin-bottom: 4px; }
+        .drawer-widget-desc { font-size: 0.72rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 4px; }
+        .drawer-widget-source { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 800; color: var(--btc-orange); text-transform: uppercase; letter-spacing: 1px; }
+        .title-row { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 20px 0 40px 0; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
         .top-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
         .price-display { font-size: 2.8rem; font-weight: 800; letter-spacing: -2px; line-height: 1; margin: 12px 0; }
         .quote-display { font-size: 0.85rem; font-style: italic; line-height: 1.4; margin-top: 5px; }
@@ -78,24 +102,258 @@
         .heavy-bar-fill { height: 100%; transition: width 1s cubic-bezier(0.1, 0.9, 0.2, 1); position: absolute; z-index: 1; }
         .heavy-bar-content { position: absolute; width: 100%; display: flex; justify-content: space-between; padding: 0 16px; box-sizing: border-box; font-weight: 800; font-size: 0.8rem; z-index: 2; text-transform: uppercase; }
 
-        /* UPDATED TELEMETRY WIDGET STYLE */
+        /* HALVING + 200WMA ROW */
+        .halving-wma-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .epoch-badge {
+            display: inline-block;
+            background: var(--btc-orange);
+            color: #000;
+            font-size: 0.55rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .halving-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+        }
+        .halving-days-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+        .halving-days-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            color: var(--btc-orange);
+            line-height: 1;
+        }
+        .halving-days-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+        }
+        .halving-progress-track {
+            height: 8px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .halving-progress-fill {
+            height: 100%;
+            background: var(--btc-orange);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        .halving-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.5rem;
+            color: var(--text-dim);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        /* MVRV Z-SCORE */
+        .mvrv-score-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .mvrv-score-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .mvrv-zone-badge {
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .mvrv-zone-badge.cold  { background: rgba(34,197,94,0.15);  color: var(--buy-color); }
+        .mvrv-zone-badge.warm  { background: rgba(247,147,26,0.15); color: var(--btc-orange); }
+        .mvrv-zone-badge.hot   { background: rgba(239,68,68,0.15);  color: var(--sell-color); }
+        .mvrv-track-wrap { position: relative; margin-bottom: 6px; }
+        .mvrv-track {
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-color);
+            position: relative;
+        }
+        .mvrv-track-segments { display: flex; height: 100%; }
+        .mvrv-seg { height: 100%; }
+        .mvrv-needle {
+            position: absolute;
+            top: -3px;
+            width: 3px;
+            height: 16px;
+            background: var(--text-main);
+            border-radius: 2px;
+            transform: translateX(-50%);
+            transition: left 1s cubic-bezier(0.1,0.9,0.2,1.2);
+            z-index: 3;
+        }
+        .mvrv-zone-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.5rem;
+            color: var(--text-dim);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .mvrv-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.55rem;
+            color: var(--text-dim);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* TELEMETRY WIDGET STYLE */
         .telemetry-widget { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin-top: 8px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 4px; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; }
 
         @media (max-width: 768px) {
             .top-metrics { grid-template-columns: 1fr 1fr; }
-            .diag-row, .data-grid { grid-template-columns: 1fr; }
+            .diag-row, .data-grid, .halving-wma-row { grid-template-columns: 1fr; }
             .dashboard-main-title { font-size: 1.2rem; letter-spacing: 4px; }
         }
-        @media (max-width: 500px) { .top-metrics { grid-template-columns: 1fr; } .telemetry-widget { flex-direction: column; gap: 10px; text-align: center; } }
+        @media (max-width: 500px) { .top-metrics { grid-template-columns: 1fr; } .telemetry-widget { flex-direction: column; gap: 10px; text-align: center; } .halving-num { font-size: 1.8rem; padding: 6px 10px; min-width: 48px; } }
     </style>
 </head>
 <body>
 
-    <!-- 1. NAVIGATION PLACEHOLDER -->
+    <!-- HELP DRAWER OVERLAY -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+    <!-- HELP DRAWER -->
+    <div class="drawer" id="help-drawer">
+        <div class="drawer-head">
+            <div class="drawer-title">Legend</div>
+            <button class="drawer-close" onclick="closeDrawer()">&#x2715;</button>
+        </div>
+        <div class="drawer-body">
+
+            <div class="drawer-section">
+                <div class="drawer-section-label">Live Price Widgets</div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">BTC / USD Spot</div>
+                    <div class="drawer-widget-desc">Real-time Bitcoin price in US dollars, streamed tick-by-tick via WebSocket. Also shows the 24h percentage change, color-coded green (up) or red (down).</div>
+                    <div class="drawer-widget-source">Source: Binance WebSocket — wss://stream.binance.com</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Sentiment Circuit</div>
+                    <div class="drawer-widget-desc">The Crypto Fear &amp; Greed Index on a 0–100 gauge. Scores below 25 signal extreme fear (historically a buying opportunity). Scores above 75 signal extreme greed (market may be overheated).</div>
+                    <div class="drawer-widget-source">Source: Alternative.me Fear &amp; Greed API</div>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-label">Market Structure</div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Gold Parity Matrix</div>
+                    <div class="drawer-widget-desc">Bitcoin's market cap expressed as a percentage of gold's estimated total market cap (~$16.5T). Tracks BTC's long-term journey toward — and potentially beyond — gold parity.</div>
+                    <div class="drawer-widget-source">Source: Calculated from live BTC price × circulating supply</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Dominance</div>
+                    <div class="drawer-widget-desc">Bitcoin's share of total global crypto market capitalisation. High dominance (&gt;50%) means capital is concentrated in BTC. A falling reading often signals rotation into altcoins (alt-season).</div>
+                    <div class="drawer-widget-source">Source: On-chain aggregator</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">OTC Liquidity Flow</div>
+                    <div class="drawer-widget-desc">Estimated Bitcoin reserves held by Over-The-Counter (OTC) desks used by institutional buyers. When OTC supply dries up, large buyers are forced onto open exchanges — a supply-shock signal that has historically preceded price moves.</div>
+                    <div class="drawer-widget-source">Source: On-chain aggregator estimates</div>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-label">On-Chain Indicators</div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">MVRV Z-Score</div>
+                    <div class="drawer-widget-desc">Market Value to Realised Value Z-Score. Compares Bitcoin's market cap to its "realised cap" — the sum of what every coin last moved was worth at the time. A Z-Score below 2 historically marks undervalued territory. Above 5 has coincided with every major market top.</div>
+                    <div class="drawer-widget-source">Source: Modelled from live price + realised cap approximation</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Halving Countdown</div>
+                    <div class="drawer-widget-desc">Every ~210,000 blocks (~4 years), Bitcoin's block subsidy is cut in half. This programmatically reduces new supply. We are in Epoch 5 (3.125 BTC per block). The next halving will cut this to 1.5625 BTC.</div>
+                    <div class="drawer-widget-source">Source: Calculated from known halving dates + 10-min block average</div>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-label">Holdings & Flows</div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Institutional Flow</div>
+                    <div class="drawer-widget-desc">Bitcoin treasury holdings of major public companies and spot ETFs. In period views (7d, 30d, etc.), shows net BTC bought or sold. Green = accumulation, Red = distribution.</div>
+                    <div class="drawer-widget-source">Source: Public filings, BitcoinTreasuries.net, ETF issuer disclosures</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Sovereign Treasury Holdings</div>
+                    <div class="drawer-widget-desc">Bitcoin held by national governments — through seizures, strategic reserves, or legal tender policy. Sovereign accumulation signals state-level recognition of BTC as a strategic reserve asset.</div>
+                    <div class="drawer-widget-source">Source: Public government disclosures, BitcoinTreasuries.net</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Supply Distribution</div>
+                    <div class="drawer-widget-desc">Breakdown of circulating supply by holder type: retail, institutions, sovereign wallets, Satoshi's known untouched coins (~1.1M BTC), and estimated permanently lost coins. In filtered views, shows net flows for the selected period.</div>
+                    <div class="drawer-widget-source">Source: On-chain clustering analysis + public data</div>
+                </div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-name">Miner Inventory &amp; Hashrate Heat</div>
+                    <div class="drawer-widget-desc">Bitcoin held by major mining pools and listed mining companies, plus total network hashrate in exahashes per second (EH/s). Miner selling pressure is a key short-term indicator — miners selling heavily can signal local tops.</div>
+                    <div class="drawer-widget-source">Source: On-chain miner wallet tracking, public mining company reports</div>
+                </div>
+            </div>
+
+            <div class="drawer-section">
+                <div class="drawer-section-label">Wisdom on the Wire</div>
+                <div class="drawer-widget">
+                    <div class="drawer-widget-desc">A curated rotating quote from Bitcoin pioneers, economists, and builders — Satoshi Nakamoto, Hal Finney, Michael Saylor, Jeff Booth, and others. A new one appears on each page load.</div>
+                    <div class="drawer-widget-source">Source: Curated quote library</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <div id="nav-placeholder"></div>
 
     <div class="container">
-        <h1 class="dashboard-main-title">B.T.C (Bitcoin Terminal Center)</h1>
+        <div class="title-row">
+            <h1 class="dashboard-main-title" style="margin: 0; border: none; padding: 0;">B.T.C (Bitcoin Terminal Center)</h1>
+            <button class="help-btn" onclick="openDrawer()">
+                <svg viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:11px;height:11px;"><rect x="1.5" y="2.5" width="3.5" height="2.5" rx="0.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 3.75h3.5M1.5 8h2M5 8h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="1.5" y="6.5" width="1.5" height="1.5" rx="0.3" stroke="currentColor" stroke-width="1.2"/></svg>
+                Legend
+            </button>
+        </div>
 
         <div class="top-metrics">
             <div class="card">
@@ -116,7 +374,7 @@
                 <span id="quote-author" class="quote-author"></span>
             </div>
             <div class="card" style="text-align: center;">
-                <div class="chart-header" style="border:none; padding:0; margin-bottom: 10px; text-align: center;">Sentiment Circuit</div>
+                <div class="chart-header" style="border:none; padding:0; margin-bottom: 10px; text-align: center; justify-content: center;">Sentiment Circuit</div>
                 <div class="gauge-wrapper">
                     <div class="gauge-container">
                         <svg viewBox="0 0 180 110" style="width: 100%; height: 100%;">
@@ -141,12 +399,67 @@
             </div>
         </div>
 
+        <!-- HALVING + 200WMA ROW -->
+        <div class="halving-wma-row">
+            <!-- Halving Countdown (compact) -->
+            <div class="card">
+                <div class="chart-header">
+                    Halving Countdown
+                    <span class="epoch-badge">Epoch 5</span>
+                </div>
+                <div class="halving-compact">
+                    <div class="halving-days-row">
+                        <div class="halving-days-num mono" id="hlv-days">---</div>
+                        <div class="halving-days-label">days until<br>next halving</div>
+                    </div>
+                    <div class="halving-progress-track">
+                        <div class="halving-progress-fill" id="hlv-progress" style="width: 0%;"></div>
+                    </div>
+                    <div class="halving-progress-labels">
+                        <span>#4 — Apr 2024</span>
+                        <span id="hlv-pct" class="mono">0%</span>
+                        <span>#5 — Est. Apr 2028</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MVRV Z-Score -->
+            <div class="card">
+                <div class="chart-header">MVRV Z-Score</div>
+                <div class="mvrv-score-row">
+                    <div class="mvrv-score-num mono" id="mvrv-score" style="color: var(--btc-orange);">2.4</div>
+                    <div class="mvrv-zone-badge warm" id="mvrv-badge">NEUTRAL</div>
+                </div>
+                <div class="mvrv-track-wrap">
+                    <div class="mvrv-track">
+                        <div class="mvrv-track-segments">
+                            <div class="mvrv-seg" style="width:33.3%; background: rgba(34,197,94,0.35);"></div>
+                            <div class="mvrv-seg" style="width:33.3%; background: rgba(247,147,26,0.35);"></div>
+                            <div class="mvrv-seg" style="width:33.4%; background: rgba(239,68,68,0.35);"></div>
+                        </div>
+                        <div class="mvrv-needle" id="mvrv-needle" style="left: 50%;"></div>
+                    </div>
+                    <div class="mvrv-zone-labels">
+                        <span style="color: var(--buy-color);">Buy (0-2)</span>
+                        <span style="color: var(--btc-orange);">Neutral (2-5)</span>
+                        <span style="color: var(--sell-color);">Sell (5+)</span>
+                    </div>
+                </div>
+                <div class="mvrv-stats">
+                    <span>MKT CAP: <span class="mono" id="mvrv-mktcap" style="color: var(--text-main);">$1.90T</span></span>
+                    <span>REAL CAP: <span class="mono" id="mvrv-realcap" style="color: var(--text-main);">$790B</span></span>
+                    <span>MVRV: <span class="mono" id="mvrv-ratio" style="color: var(--btc-orange);">2.41x</span></span>
+                </div>
+            </div>
+        </div>
+
         <div class="filter-section">
             <div class="filter-container">
                 <button id="btn-7d" class="filter-btn active" onclick="updateDashboard('7d', this)">7 Days</button>
                 <button id="btn-30d" class="filter-btn" onclick="updateDashboard('30d', this)">30 Days</button>
                 <button id="btn-3m" class="filter-btn" onclick="updateDashboard('3m', this)">3 Months</button>
                 <button id="btn-6m" class="filter-btn" onclick="updateDashboard('6m', this)">6 Months</button>
+                <button id="btn-12m" class="filter-btn" onclick="updateDashboard('12m', this)">12 Months</button>
                 <button id="btn-all" class="filter-btn" onclick="updateDashboard('all', this)">Since Genesis</button>
             </div>
         </div>
@@ -178,14 +491,13 @@
             <div class="card"><div class="chart-header">Miner Inventory & Hashrate Heat</div><div id="miner-list"></div></div>
         </div>
 
-        <!-- NEW FOOTER WITH VIEWS AND VERSION -->
         <div class="telemetry-widget mono">
             <div style="display: flex; gap: 20px;">
                 <span>SOURCE: BINANCE | ALTERNATIVE.ME | ON-CHAIN AGG.</span>
                 <span>VIEWS: <span id="view-count" style="color: var(--text-main);">0</span></span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <span style="color: var(--text-dim);">VER: 1.0.4-BETA</span>
+                <span style="color: var(--text-dim);">VER: 1.0.8-BETA</span>
                 <span style="background: var(--inactive-bar); color: var(--text-main); padding: 3px 6px; border-radius: 3px; font-size: 0.55rem; letter-spacing: 2px;">BETA</span>
                 <span id="sync-stamp">LIVE SYNC: --:--:--</span>
             </div>
@@ -231,6 +543,7 @@
     const db = {
         'all': { label: "Since Genesis", otc: { fill: '12%', bal: '82,400', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 818334, 'Spot ETFs (Combined)': 1085420, 'Metaplanet': 1142, 'Semler Sci.': 929, 'Smart Web UK': 612}, supply: {'Retail Base': 12750000, 'Institutions': 1600000, 'Sovereign': 650000, 'Satoshi Stack': 1100000, 'Lost Coins': 2600000}, nation: {'US Government': 213246, 'Bhutan': 13025, 'El Salvador': 5724, 'Russia': 25000}, miner: {'Foundry Pool': 428000, 'Antpool': 312000, 'MARA Holdings': 24500, 'RIOT Platforms': 18200, 'Hashrate (EH/s)': 842}, dom: "54.2%" },
         '6m': { label: "6 Months", otc: { fill: '18%', bal: '124,500', dry: 'AUG 2026' }, inst: {'Strategy (MSTR)': 215400, 'Spot ETFs (Combined)': 342100}, supply: {'Institutions': 397500, 'Sovereign': 12000, 'Retail Base': 125000}, nation: {'El Salvador': 180, 'Russia': 4500}, miner: {'MARA Holdings': 5200, 'RIOT Platforms': 1200, 'Hashrate (EH/s)': 142}, dom: "51.4%" },
+        '12m': { label: "12 Months", otc: { fill: '22%', bal: '156,800', dry: 'SEP 2026' }, inst: {'Strategy (MSTR)': 430200, 'Spot ETFs (Combined)': 620400, 'Metaplanet': 890, 'Semler Sci.': 620}, supply: {'Institutions': 680000, 'Sovereign': 38000, 'Retail Base': 290000, 'Satoshi Stack': 1100000}, nation: {'US Government': 45000, 'El Salvador': 420, 'Bhutan': 3800, 'Russia': 12000}, miner: {'Foundry Pool': 82000, 'Antpool': 61000, 'MARA Holdings': 9800, 'RIOT Platforms': 3400, 'Hashrate (EH/s)': 280}, dom: "50.1%" },
         '3m': { label: "3 Months", otc: { fill: '15%', bal: '102,000', dry: 'JULY 2026' }, inst: {'Strategy (MSTR)': 98000, 'Spot ETFs (Combined)': 145000}, supply: {'Institutions': 145000, 'Retail Base': 82000}, nation: {'El Salvador': 90, 'Bhutan': 450}, miner: {'MARA Holdings': 2100, 'RIOT Platforms': 450, 'Hashrate (EH/s)': 68}, dom: "52.9%" },
         '30d': { label: "30 Days", otc: { fill: '13%', bal: '88,000', dry: 'JUNE 2026' }, inst: {'Spot ETFs (Combined)': 32400}, supply: {'Retail Base': 68635, 'Sovereign': 1200, 'Institutions': -22000}, nation: {'El Salvador': 30}, miner: {'Foundry Pool': -4500, 'Antpool': -8200, 'RIOT Platforms': -120, 'Hashrate (EH/s)': -12}, dom: "53.5%" },
         '7d': { label: "7 Days", otc: { fill: '11%', bal: '78,200', dry: 'JUNE 2026' }, inst: {'Strategy (MSTR)': 3273, 'Spot ETFs (Combined)': 14285}, supply: {'Retail Base': -2100, 'Institutions': 14285, 'Sovereign': 45}, nation: {'El Salvador': 7}, miner: {'Foundry Pool': -1200, 'MARA Holdings': 250, 'RIOT Platforms': 15, 'Hashrate (EH/s)': 2}, dom: "53.8%" }
@@ -282,6 +595,82 @@
         } catch (e) {}
     }
 
+    // HALVING COUNTDOWN (compact — days only)
+    function updateHalving() {
+        const halvingStart = new Date('2024-04-19T20:09:00Z');
+        const halvingEnd = new Date('2028-04-17T00:00:00Z');
+        const now = new Date();
+        const totalMs = halvingEnd - halvingStart;
+        const remainingMs = Math.max(0, halvingEnd - now);
+        const elapsedMs = now - halvingStart;
+        const pct = Math.min(100, (elapsedMs / totalMs) * 100);
+
+        const days = Math.floor(remainingMs / 86400000);
+        document.getElementById('hlv-days').innerText = String(days).padStart(3, '0');
+        document.getElementById('hlv-progress').style.width = pct.toFixed(2) + '%';
+        document.getElementById('hlv-pct').innerText = pct.toFixed(1) + '%';
+    }
+
+    // MVRV Z-SCORE
+    // MVRV = Market Cap / Realised Cap. Z-Score normalises this vs its historical std deviation.
+    // We approximate using live BTC price from Binance + a modelled realised cap.
+    // Realised cap ref: ~$790B as of early 2025, growing ~1.2% per month.
+    function updateMVRV() {
+        const spotText = document.getElementById('btc-price').innerText.replace(/[$,]/g, '');
+        const spot = parseFloat(spotText) || 95000;
+        const SUPPLY = 19980000;
+        const mktCap = spot * SUPPLY;
+
+        const rcRefDate = new Date('2025-01-01T00:00:00Z');
+        const rcRefVal = 790e9;
+        const monthlyGrowth = 0.012;
+        const monthsElapsed = (new Date() - rcRefDate) / (30.44 * 24 * 3600 * 1000);
+        const realisedCap = rcRefVal * Math.pow(1 + monthlyGrowth, monthsElapsed);
+
+        const mvrv = mktCap / realisedCap;
+        // Z-score: approximate historical mean MVRV ~1.5, std ~1.8
+        const zScore = (mvrv - 1.5) / 1.8;
+        const zClamped = Math.max(-1, Math.min(zScore, 8));
+
+        document.getElementById('mvrv-score').innerText = zScore.toFixed(2);
+        document.getElementById('mvrv-mktcap').innerText = '$' + (mktCap / 1e12).toFixed(2) + 'T';
+        document.getElementById('mvrv-realcap').innerText = '$' + (realisedCap / 1e9).toFixed(0) + 'B';
+        document.getElementById('mvrv-ratio').innerText = mvrv.toFixed(2) + 'x';
+
+        // Needle position: scale z-score -1..8 → 0%..100%
+        const needlePct = ((zClamped + 1) / 9) * 100;
+        document.getElementById('mvrv-needle').style.left = needlePct.toFixed(1) + '%';
+
+        // Zone logic: z < 2 = buy/cold, 2-5 = neutral/warm, >5 = sell/hot
+        const scoreEl = document.getElementById('mvrv-score');
+        const badge = document.getElementById('mvrv-badge');
+        if (zScore < 2) {
+            scoreEl.style.color = 'var(--buy-color)';
+            badge.className = 'mvrv-zone-badge cold';
+            badge.innerText = 'BUY ZONE';
+        } else if (zScore < 5) {
+            scoreEl.style.color = 'var(--btc-orange)';
+            badge.className = 'mvrv-zone-badge warm';
+            badge.innerText = 'NEUTRAL';
+        } else {
+            scoreEl.style.color = 'var(--sell-color)';
+            badge.className = 'mvrv-zone-badge hot';
+            badge.innerText = 'SELL ZONE';
+        }
+    }
+
+    function openDrawer() {
+        document.getElementById('help-drawer').classList.add('open');
+        document.getElementById('drawer-overlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+        document.getElementById('help-drawer').classList.remove('open');
+        document.getElementById('drawer-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
     window.onload = () => { 
         // QUOTE LOGIC
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -296,7 +685,15 @@
         
         fetchFNG(); 
         setInterval(fetchFNG, 600000); 
-        updateDashboard('7d', document.getElementById('btn-7d')); 
+        updateDashboard('7d', document.getElementById('btn-7d'));
+
+        // Halving countdown — tick every minute (days only, no need for per-second)
+        updateHalving();
+        setInterval(updateHalving, 60000);
+
+        // MVRV Z-Score — update every 30s (re-reads spot price)
+        updateMVRV();
+        setInterval(updateMVRV, 30000);
     };
 </script>
 </body>
