@@ -484,18 +484,10 @@
                 <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 12px; font-weight: 700; text-align: right;">BALANCE: <span id="otc-bal" class="mono">0</span> BTC</div>
             </div>
             <div class="card">
-                <div class="chart-header">Exchange Reserve</div>
-                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;">
-                    <div class="mono" id="exch-val" style="font-size: 1.6rem; font-weight: 800; letter-spacing: -1px;">0</div>
-                    <div class="mono" id="exch-change" style="font-size: 0.75rem; font-weight: 800; color: var(--buy-color);">+0</div>
-                </div>
-                <div class="heavy-bar-bg">
-                    <div class="heavy-bar-content"><span>BTC ON EXCHANGES</span><span id="exch-perc" class="mono">0%</span></div>
-                    <div id="exch-fill" class="heavy-bar-fill" style="width: 0%;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.55rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                    <span>SIGNAL: <span id="exch-signal" class="mono">--</span></span>
-                    <span>PEAK: <span class="mono" style="color: var(--text-main);">3.2M BTC</span></span>
+                <div class="chart-header">Dominance</div>
+                <div class="heavy-bar-bg" style="margin-top: 10px;">
+                    <div class="heavy-bar-content"><span>BTC DOM</span><span id="dom-val" class="mono">0%</span></div>
+                    <div id="dom-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
                 </div>
             </div>
         </div>
@@ -514,10 +506,18 @@
                 <div style="font-size: 0.55rem; color: var(--text-dim); margin-top: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Coins that have not moved during the selected period</div>
             </div>
             <div class="card">
-                <div class="chart-header">Dominance</div>
-                <div class="heavy-bar-bg" style="margin-top: 10px;">
-                    <div class="heavy-bar-content"><span>BTC DOM</span><span id="dom-val" class="mono">0%</span></div>
-                    <div id="dom-fill" class="heavy-bar-fill" style="width: 0%; background: var(--btc-orange);"></div>
+                <div class="chart-header">Exchange Reserve</div>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;">
+                    <div class="mono" id="exch-val" style="font-size: 1.6rem; font-weight: 800; letter-spacing: -1px;">0</div>
+                    <div class="mono" id="exch-change" style="font-size: 0.75rem; font-weight: 800; color: var(--buy-color);">+0</div>
+                </div>
+                <div class="heavy-bar-bg">
+                    <div class="heavy-bar-content"><span>BTC ON EXCHANGES</span><span id="exch-perc" class="mono">0%</span></div>
+                    <div id="exch-fill" class="heavy-bar-fill" style="width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.55rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                    <span>SIGNAL: <span id="exch-signal" class="mono">--</span></span>
+                    <span>PEAK: <span class="mono" style="color: var(--text-main);">3.2M BTC</span></span>
                 </div>
             </div>
         </div>
@@ -538,7 +538,7 @@
                 <span>QUESTIONS? DM <a href="https://x.com/mrmpodcast" target="_blank" style="color: var(--btc-orange); text-decoration: none; letter-spacing: 1px;">@mrmpodcast</a> ON X</span>
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <span style="color: var(--text-dim);">VER: 1.1.3-BETA</span>
+                <span style="color: var(--text-dim);">VER: 1.1.4-BETA</span>
                 <span style="background: var(--inactive-bar); color: var(--text-main); padding: 3px 6px; border-radius: 3px; font-size: 0.55rem; letter-spacing: 2px;">BETA</span>
                 <span id="sync-stamp">LIVE SYNC: --:--:--</span>
             </div>
