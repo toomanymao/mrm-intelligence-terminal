@@ -54,7 +54,24 @@
         .leader-mini-bar { display: inline-block; height: 5px; border-radius: 2px; vertical-align: middle; margin-left: 8px; min-width: 4px; transition: width 0.4s ease; }
 
         /* CONTROLS */
-        .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .controls {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 10px 0 12px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 10px 20px -10px rgba(0,0,0,0.8);
+            margin-left: -20px;
+            margin-right: -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
         .ctrl-label { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); }
         .ctrl-btn { background: var(--card); border: 1px solid var(--border); color: var(--dim); padding: 6px 14px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px; transition: 0.15s; }
         .ctrl-btn:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
