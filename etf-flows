@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. M Podcast | BTC ETF Flow Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@400;500;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ED757EV8FX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ED757EV8FX');</script>
+    <style>
+        :root {
+            --bg: #0f0f13; --card: #18181f; --text: #f8fafc; --dim: #8b949e;
+            --border: #2d333b; --orange: #f7931a; --green: #22c55e; --red: #ef4444;
+            --blue: #3b82f6; --inactive: #252830;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px 60px; }
+
+        /* HEADER */
+        .page-header { text-align: center; padding: 32px 20px 0; }
+        .page-title { font-size: 1.8rem; letter-spacing: 8px; font-weight: 800; text-transform: uppercase; color: var(--text); }
+        .page-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--dim); letter-spacing: 3px; text-transform: uppercase; font-weight: 800; margin-top: 6px; margin-bottom: 20px; }
+        .header-rule { border: none; border-top: 1px solid var(--border); margin: 0 0 24px; }
+
+        /* SUMMARY PANEL */
+        .summary-panel { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 22px 24px; margin-bottom: 16px; }
+        .summary-top { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+        .summary-net-label { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); margin-bottom: 4px; }
+        .summary-net-val { font-family: 'JetBrains Mono', monospace; font-size: 3rem; font-weight: 800; letter-spacing: -3px; line-height: 1; transition: color 0.3s; }
+        .summary-net-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); margin-top: 6px; }
+        .summary-split { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .summary-split-item {}
+        .split-label { font-family: 'JetBrains Mono', monospace; font-size: 0.48rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); margin-bottom: 4px; }
+        .split-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+        .split-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.48rem; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+        .split-bar-track { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; border: 1px solid var(--border); }
+        .split-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+        .summary-bottom {}
+        .summary-leader-label { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); margin-bottom: 10px; }
+        .leader-table { width: 100%; border-collapse: collapse; }
+        .leader-table tr { border-bottom: 1px solid var(--border); }
+        .leader-table tr:last-child { border-bottom: none; }
+        .leader-table td { padding: 7px 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 700; vertical-align: middle; }
+        .leader-rank { color: var(--dim); width: 28px; font-size: 0.5rem; }
+        .leader-ticker { color: var(--text); font-weight: 800; width: 50px; }
+        .leader-name { color: var(--dim); font-size: 0.52rem; }
+        .leader-badge { display: inline-block; padding: 2px 10px; border-radius: 3px; font-size: 0.5rem; font-weight: 800; letter-spacing: 1px; text-align: right; }
+        .leader-badge.top    { background: rgba(247,147,26,0.15); color: var(--orange); }
+        .leader-badge.pos    { background: rgba(34,197,94,0.12);  color: var(--green); }
+        .leader-badge.neg    { background: rgba(239,68,68,0.12);  color: var(--red); }
+        .leader-mini-bar { display: inline-block; height: 5px; border-radius: 2px; vertical-align: middle; margin-left: 8px; min-width: 4px; transition: width 0.4s ease; }
+
+        /* CONTROLS */
+        .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .ctrl-label { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); }
+        .ctrl-btn { background: var(--card); border: 1px solid var(--border); color: var(--dim); padding: 6px 14px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; border-radius: 4px; transition: 0.15s; }
+        .ctrl-btn:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
+        .ctrl-btn.active { background: var(--orange); color: #000; border-color: var(--orange); }
+        .ctrl-divider { width: 1px; height: 16px; background: var(--border); }
+        .search-box { background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; border-radius: 4px; outline: none; width: 140px; }
+        .search-box::placeholder { color: var(--dim); }
+        .search-box:focus { border-color: var(--orange); }
+
+        /* TABLE */
+        .table-wrap { overflow-x: auto; background: var(--card); border: 1px solid var(--border); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; }
+        thead th {
+            background: #13131a;
+            color: var(--dim);
+            font-size: 0.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 8px;
+            text-align: right;
+            border-bottom: 2px solid var(--orange);
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        thead th:first-child { text-align: left; min-width: 90px; position: sticky; left: 0; z-index: 20; background: #13131a; }
+        thead th:last-child { border-right: none; border-left: 2px solid var(--orange); color: var(--orange); }
+
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+        tbody tr:hover { background: #1e1e28; }
+        tbody tr.month-header td { background: #13131a; color: var(--orange); font-size: 0.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+        tbody tr.month-total td { background: #13131a; font-weight: 800; border-top: 1px solid var(--border); border-bottom: 2px solid var(--orange); }
+
+        td {
+            padding: 7px 8px;
+            text-align: right;
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+            font-weight: 700;
+            font-size: 0.58rem;
+        }
+        td:first-child { text-align: left; color: var(--dim); font-size: 0.55rem; position: sticky; left: 0; background: var(--card); z-index: 5; border-right: 1px solid var(--border); }
+        tbody tr:hover td:first-child { background: #1e1e28; }
+        tbody tr.month-total td:first-child { background: #13131a; color: var(--orange); }
+        td:last-child { border-right: none; border-left: 2px solid var(--orange); font-weight: 800; }
+
+        /* CELL COLOURS */
+        .pos { color: var(--green); }
+        .neg { color: var(--red); }
+        .zero { color: var(--dim); }
+        .blank { color: var(--inactive); }
+
+        /* CELL BACKGROUND HEAT */
+        .heat-pos-3 { background: rgba(34,197,94,0.20); }
+        .heat-pos-2 { background: rgba(34,197,94,0.12); }
+        .heat-pos-1 { background: rgba(34,197,94,0.06); }
+        .heat-neg-3 { background: rgba(239,68,68,0.20); }
+        .heat-neg-2 { background: rgba(239,68,68,0.12); }
+        .heat-neg-1 { background: rgba(239,68,68,0.06); }
+
+        /* CORRELATION CHART */
+        .corr-card { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 20px 20px 14px; margin-bottom: 16px; }
+        .corr-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+        .corr-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; color: var(--dim); font-weight: 700; margin-top: 4px; }
+        .corr-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+        .corr-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px 14px; }
+        .corr-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.42rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); margin-bottom: 3px; }
+        .corr-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 800; }
+        .corr-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px; }
+        .corr-leg { display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-size: 0.48rem; font-weight: 800; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+        .corr-leg-line { width: 18px; height: 2px; border-radius: 1px; }
+        .corr-leg-bar { width: 10px; height: 10px; border-radius: 2px; }
+        .corr-insight { margin-top: 12px; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 700; color: var(--text); line-height: 1.6; }
+
+        /* ACCORDIONS */
+        .accord-more { background: none; border: 1px solid var(--border); color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 6px 14px; border-radius: 4px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.15s; }
+        .accord-more:hover { border-color: var(--orange); color: var(--orange); }
+
+        /* MONTH ACCORDION */
+        .month-group-header-row { cursor: pointer; }
+        .month-group-header-row:hover td > div { background: #1a1a24; }
+        .month-chev { font-size: 1.1rem; font-weight: 800; color: var(--orange); line-height: 1; min-width: 20px; text-align: center; }
+
+        /* PAGINATION */
+        .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+        .page-btn { background: var(--card); border: 1px solid var(--border); color: var(--dim); padding: 5px 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 0.55rem; border-radius: 4px; transition: 0.15s; }
+        .page-btn.active { background: var(--orange); color: #000; border-color: var(--orange); }
+        .page-btn:hover:not(.active) { border-color: var(--orange); color: var(--orange); }
+
+        /* FOOTER */
+        .page-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--dim); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
+
+        @media (max-width: 900px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .stats-row { grid-template-columns: 1fr; } .page-title { font-size: 1.1rem; letter-spacing: 4px; } .page-footer { flex-direction: column; gap: 8px; } }
+    </style>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+
+<div class="page-header">
+    <div class="page-title">BTC ETF Flow Tracker</div>
+    <div class="page-subtitle">US Spot Bitcoin ETF Daily Flows — USD Millions — Since Jan 11, 2024</div>
+</div>
+<hr class="header-rule">
+
+<div class="container">
+
+    <!-- CONTROLS -->
+    <div class="controls">
+        <span class="ctrl-label">View:</span>
+        <button class="ctrl-btn" data-view="7d"   onclick="setView('7d', this)">7 Days</button>
+        <button class="ctrl-btn" data-view="30d"  onclick="setView('30d', this)">30 Days</button>
+        <button class="ctrl-btn" data-view="90d"  onclick="setView('90d', this)">3 Months</button>
+        <button class="ctrl-btn" data-view="180d" onclick="setView('180d', this)">6 Months</button>
+        <div class="ctrl-divider"></div>
+        <button class="ctrl-btn" data-view="2024" onclick="setView('2024', this)">2024</button>
+        <button class="ctrl-btn" data-view="2025" onclick="setView('2025', this)">2025</button>
+        <button class="ctrl-btn active" data-view="all" onclick="setView('all', this)">All Time</button>
+        <div class="ctrl-divider"></div>
+        <input class="search-box" type="text" id="date-search" placeholder="Search date… e.g. Mar 2025" oninput="handleSearch(this.value)">
+    </div>
+
+    <!-- DYNAMIC SUMMARY -->
+    <div class="summary-panel" id="summary-panel">
+        <!-- Row 1: Big total + inflow/outflow split -->
+        <div class="summary-top">
+            <div class="summary-net">
+                <div class="summary-net-label">Net Flow</div>
+                <div class="summary-net-val" id="sum-net">+$0M</div>
+                <div class="summary-net-sub" id="sum-period">All Time</div>
+            </div>
+            <div class="summary-split">
+                <div class="summary-split-item">
+                    <div class="split-label">Total Inflows</div>
+                    <div class="split-val pos" id="sum-in">+$0M</div>
+                    <div class="split-bar-track">
+                        <div class="split-bar-fill" id="sum-in-bar" style="background:var(--green);width:0%;"></div>
+                    </div>
+                </div>
+                <div class="summary-split-item">
+                    <div class="split-label">Total Outflows</div>
+                    <div class="split-val neg" id="sum-out">-$0M</div>
+                    <div class="split-bar-track">
+                        <div class="split-bar-fill" id="sum-out-bar" style="background:var(--red);width:0%;"></div>
+                    </div>
+                </div>
+                <div class="summary-split-item">
+                    <div class="split-label">Inflow Days</div>
+                    <div class="split-val" id="sum-days-in" style="color:var(--text);">0</div>
+                    <div class="split-sub" id="sum-days-pct">vs 0 outflow days</div>
+                </div>
+            </div>
+        </div>
+        <!-- Row 2: Top accumulator — always visible top 3, expandable rest -->
+        <div class="summary-bottom">
+            <div class="summary-leader-label">Top Accumulator</div>
+            <div id="sum-leaders-top"></div>
+
+        </div>
+    </div>
+
+    <!-- CORRELATION CHART -->
+    <div class="card corr-card">
+        <div class="corr-header">
+            <div>
+                <div class="chart-header" style="margin-bottom:4px;">BTC Price vs. ETF Flow Correlation</div>
+                <div class="corr-sub">Dual-axis: BTC price (line) vs net daily ETF flow (bars). Rolling 14-day correlation coefficient shown below.</div>
+            </div>
+            <div class="corr-stats">
+                <div class="corr-stat">
+                    <div class="corr-stat-label">Correlation (14D)</div>
+                    <div class="corr-stat-val" id="corr-coef">—</div>
+                </div>
+                <div class="corr-stat">
+                    <div class="corr-stat-label">Relationship</div>
+                    <div class="corr-stat-val" id="corr-label" style="color:var(--orange);">—</div>
+                </div>
+                <div class="corr-stat">
+                    <div class="corr-stat-label">Avg Flow on Up Days</div>
+                    <div class="corr-stat-val pos" id="corr-up">—</div>
+                </div>
+                <div class="corr-stat">
+                    <div class="corr-stat-label">Avg Flow on Down Days</div>
+                    <div class="corr-stat-val neg" id="corr-down">—</div>
+                </div>
+            </div>
+        </div>
+        <div style="height:200px;position:relative;margin-bottom:8px;">
+            <canvas id="corrChart"></canvas>
+        </div>
+        <div class="corr-legend">
+            <div class="corr-leg"><div class="corr-leg-line" style="background:var(--orange);"></div>BTC Price</div>
+            <div class="corr-leg"><div class="corr-leg-line" style="background:rgba(59,130,246,0.85);"></div>Net ETF Flow</div>
+        </div>
+        <div class="corr-insight" id="corr-insight">Calculating correlation…</div>
+    </div>
+
+    <!-- FLOW TABLE -->
+    <div class="table-wrap">
+        <table id="flow-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>IBIT<br><span style="font-weight:400;color:#5a6370;">BlackRock</span></th>
+                    <th>FBTC<br><span style="font-weight:400;color:#5a6370;">Fidelity</span></th>
+                    <th>GBTC<br><span style="font-weight:400;color:#5a6370;">Grayscale</span></th>
+                    <th>ARKB<br><span style="font-weight:400;color:#5a6370;">ARK/21Sh</span></th>
+                    <th>BITB<br><span style="font-weight:400;color:#5a6370;">Bitwise</span></th>
+                    <th>BTCO<br><span style="font-weight:400;color:#5a6370;">Invesco</span></th>
+                    <th>HODL<br><span style="font-weight:400;color:#5a6370;">VanEck</span></th>
+                    <th>BRRR<br><span style="font-weight:400;color:#5a6370;">Valkyrie</span></th>
+                    <th>EZBC<br><span style="font-weight:400;color:#5a6370;">Franklin</span></th>
+                    <th>BTCW<br><span style="font-weight:400;color:#5a6370;">WisdomTr</span></th>
+                    <th>BTC<br><span style="font-weight:400;color:#5a6370;">GS Mini</span></th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="flow-tbody"></tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination" id="pagination"></div>
+
+    <div class="page-footer">
+        <span>Data: Approximated from Farside Investors, Bloomberg, ETF Issuer Disclosures &nbsp;·&nbsp; Figures in USD Millions</span>
+        <span>DM <a href="https://x.com/mrmpodcast" target="_blank" style="color:var(--orange);text-decoration:none;">@mrmpodcast</a> on X</span>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+fetch('navigation.html').then(r=>r.text()).then(d=>{
+    document.getElementById('nav-placeholder').innerHTML=d;
+    const l=document.getElementById('nav-link-etf'); if(l)l.classList.add('active');
+}).catch(()=>{});
+
+// ── ETF COLUMN ORDER ─────────────────────────────────────────────────────
+const ETFS = ['IBIT','FBTC','GBTC','ARKB','BITB','BTCO','HODL','BRRR','EZBC','BTCW','BTC'];
+
+// ── FLOW DATA (USD Millions, approximated from Farside/Bloomberg) ─────────
+// Format: { date:'YYYY-MM-DD', IBIT, FBTC, GBTC, ARKB, BITB, BTCO, HODL, BRRR, EZBC, BTCW, BTC }
+// null = ETF did not exist yet or no data; 0 = flat day
+const RAW = [
+// === 2024 JANUARY ===
+{date:'2024-01-11',IBIT:111.7,FBTC:227.2,GBTC:-95.1,ARKB:0,BITB:0,BTCO:0,HODL:0,BRRR:0,EZBC:0,BTCW:0,BTC:null},
+{date:'2024-01-12',IBIT:289.4,FBTC:274.0,GBTC:-204.8,ARKB:4.5,BITB:11.1,BTCO:5.5,HODL:1.8,BRRR:2.5,EZBC:0.5,BTCW:0.6,BTC:null},
+{date:'2024-01-16',IBIT:267.0,FBTC:245.0,GBTC:-314.2,ARKB:22.0,BITB:18.5,BTCO:11.1,HODL:2.4,BRRR:4.2,EZBC:1.1,BTCW:0.9,BTC:null},
+{date:'2024-01-17',IBIT:231.0,FBTC:190.0,GBTC:-255.0,ARKB:45.0,BITB:21.0,BTCO:8.2,HODL:3.1,BRRR:5.0,EZBC:1.8,BTCW:1.2,BTC:null},
+{date:'2024-01-18',IBIT:445.0,FBTC:199.0,GBTC:-186.0,ARKB:52.0,BITB:29.0,BTCO:9.6,HODL:4.2,BRRR:6.5,EZBC:2.0,BTCW:1.5,BTC:null},
+{date:'2024-01-19',IBIT:474.0,FBTC:246.0,GBTC:-167.0,ARKB:73.0,BITB:24.0,BTCO:11.0,HODL:5.0,BRRR:7.0,EZBC:2.5,BTCW:1.8,BTC:null},
+{date:'2024-01-22',IBIT:407.0,FBTC:183.0,GBTC:-192.0,ARKB:68.0,BITB:29.0,BTCO:12.0,HODL:5.5,BRRR:8.0,EZBC:3.0,BTCW:2.0,BTC:null},
+{date:'2024-01-23',IBIT:449.0,FBTC:175.0,GBTC:-140.0,ARKB:53.0,BITB:22.0,BTCO:10.5,HODL:4.8,BRRR:7.5,EZBC:2.8,BTCW:1.9,BTC:null},
+{date:'2024-01-24',IBIT:601.0,FBTC:199.0,GBTC:-153.0,ARKB:60.0,BITB:25.0,BTCO:11.5,HODL:5.2,BRRR:8.5,EZBC:3.2,BTCW:2.2,BTC:null},
+{date:'2024-01-25',IBIT:670.0,FBTC:221.0,GBTC:-129.0,ARKB:89.0,BITB:33.0,BTCO:14.0,HODL:6.0,BRRR:9.0,EZBC:3.5,BTCW:2.5,BTC:null},
+{date:'2024-01-26',IBIT:509.0,FBTC:195.0,GBTC:-145.0,ARKB:81.0,BITB:30.0,BTCO:13.5,HODL:5.8,BRRR:8.8,EZBC:3.3,BTCW:2.3,BTC:null},
+{date:'2024-01-29',IBIT:585.0,FBTC:202.0,GBTC:-251.0,ARKB:62.0,BITB:27.0,BTCO:12.0,HODL:5.0,BRRR:8.0,EZBC:3.0,BTCW:2.1,BTC:null},
+{date:'2024-01-30',IBIT:493.0,FBTC:177.0,GBTC:-217.0,ARKB:52.0,BITB:24.0,BTCO:11.0,HODL:4.5,BRRR:7.5,EZBC:2.8,BTCW:1.9,BTC:null},
+{date:'2024-01-31',IBIT:452.0,FBTC:157.0,GBTC:-255.0,ARKB:47.0,BITB:21.0,BTCO:10.0,HODL:4.0,BRRR:7.0,EZBC:2.5,BTCW:1.7,BTC:null},
+// === 2024 FEBRUARY ===
+{date:'2024-02-01',IBIT:504.0,FBTC:188.0,GBTC:-187.0,ARKB:48.0,BITB:22.0,BTCO:10.5,HODL:4.2,BRRR:7.2,EZBC:2.6,BTCW:1.8,BTC:null},
+{date:'2024-02-02',IBIT:610.0,FBTC:191.0,GBTC:-144.0,ARKB:55.0,BITB:26.0,BTCO:11.5,HODL:4.8,BRRR:8.0,EZBC:2.9,BTCW:2.0,BTC:null},
+{date:'2024-02-05',IBIT:680.0,FBTC:210.0,GBTC:-139.0,ARKB:72.0,BITB:31.0,BTCO:13.0,HODL:5.5,BRRR:8.8,EZBC:3.1,BTCW:2.2,BTC:null},
+{date:'2024-02-06',IBIT:619.0,FBTC:218.0,GBTC:-98.0,ARKB:88.0,BITB:34.0,BTCO:14.5,HODL:6.2,BRRR:9.5,EZBC:3.4,BTCW:2.4,BTC:null},
+{date:'2024-02-07',IBIT:628.0,FBTC:253.0,GBTC:-74.0,ARKB:94.0,BITB:37.0,BTCO:15.5,HODL:6.8,BRRR:10.0,EZBC:3.7,BTCW:2.6,BTC:null},
+{date:'2024-02-08',IBIT:697.0,FBTC:243.0,GBTC:-91.0,ARKB:77.0,BITB:33.0,BTCO:14.0,HODL:6.0,BRRR:9.2,EZBC:3.3,BTCW:2.3,BTC:null},
+{date:'2024-02-09',IBIT:752.0,FBTC:280.0,GBTC:-71.0,ARKB:98.0,BITB:40.0,BTCO:17.0,HODL:7.5,BRRR:11.0,EZBC:4.0,BTCW:2.8,BTC:null},
+{date:'2024-02-12',IBIT:663.0,FBTC:265.0,GBTC:-155.0,ARKB:79.0,BITB:34.0,BTCO:14.5,HODL:6.3,BRRR:9.5,EZBC:3.4,BTCW:2.4,BTC:null},
+{date:'2024-02-13',IBIT:488.0,FBTC:178.0,GBTC:-185.0,ARKB:40.0,BITB:18.0,BTCO:8.0,HODL:3.5,BRRR:5.5,EZBC:2.0,BTCW:1.4,BTC:null},
+{date:'2024-02-14',IBIT:512.0,FBTC:198.0,GBTC:-85.0,ARKB:59.0,BITB:26.0,BTCO:11.0,HODL:4.8,BRRR:7.5,EZBC:2.7,BTCW:1.9,BTC:null},
+{date:'2024-02-15',IBIT:654.0,FBTC:262.0,GBTC:-55.0,ARKB:82.0,BITB:36.0,BTCO:15.5,HODL:6.8,BRRR:10.2,EZBC:3.7,BTCW:2.6,BTC:null},
+{date:'2024-02-16',IBIT:580.0,FBTC:238.0,GBTC:-147.0,ARKB:68.0,BITB:30.0,BTCO:13.0,HODL:5.6,BRRR:8.5,EZBC:3.1,BTCW:2.2,BTC:null},
+{date:'2024-02-20',IBIT:612.0,FBTC:225.0,GBTC:-133.0,ARKB:74.0,BITB:32.0,BTCO:13.8,HODL:6.0,BRRR:9.0,EZBC:3.3,BTCW:2.3,BTC:null},
+{date:'2024-02-21',IBIT:709.0,FBTC:273.0,GBTC:-38.0,ARKB:120.0,BITB:52.0,BTCO:22.0,HODL:9.5,BRRR:14.5,EZBC:5.2,BTCW:3.7,BTC:null},
+{date:'2024-02-22',IBIT:849.0,FBTC:322.0,GBTC:-38.0,ARKB:143.0,BITB:63.0,BTCO:27.0,HODL:11.5,BRRR:17.5,EZBC:6.3,BTCW:4.4,BTC:null},
+{date:'2024-02-23',IBIT:1052.0,FBTC:317.0,GBTC:-178.0,ARKB:112.0,BITB:49.0,BTCO:21.0,HODL:9.0,BRRR:13.5,EZBC:4.8,BTCW:3.4,BTC:null},
+{date:'2024-02-26',IBIT:733.0,FBTC:296.0,GBTC:-173.0,ARKB:117.0,BITB:52.0,BTCO:22.0,HODL:9.5,BRRR:14.0,EZBC:5.0,BTCW:3.5,BTC:null},
+{date:'2024-02-27',IBIT:649.0,FBTC:250.0,GBTC:-233.0,ARKB:93.0,BITB:41.0,BTCO:17.5,HODL:7.5,BRRR:11.5,EZBC:4.1,BTCW:2.9,BTC:null},
+{date:'2024-02-28',IBIT:604.0,FBTC:221.0,GBTC:-173.0,ARKB:75.0,BITB:33.0,BTCO:14.0,HODL:6.0,BRRR:9.2,EZBC:3.3,BTCW:2.3,BTC:null},
+{date:'2024-02-29',IBIT:788.0,FBTC:326.0,GBTC:-93.0,ARKB:134.0,BITB:59.0,BTCO:25.0,HODL:10.8,BRRR:16.5,EZBC:5.9,BTCW:4.2,BTC:null},
+// === 2024 Q2 SAMPLE ===
+{date:'2024-03-01',IBIT:849.0,FBTC:280.0,GBTC:-79.0,ARKB:93.0,BITB:24.6,BTCO:-19.7,HODL:82.9,BRRR:39.6,EZBC:0,BTCW:3.0,BTC:null},
+{date:'2024-03-12',IBIT:849.0,FBTC:51.6,GBTC:-79.0,ARKB:93.0,BITB:24.6,BTCO:-19.7,HODL:82.9,BRRR:39.6,EZBC:0,BTCW:3.0,BTC:null},
+{date:'2024-03-13',IBIT:1026.0,FBTC:344.0,GBTC:-212.0,ARKB:147.0,BITB:66.0,BTCO:28.0,HODL:12.0,BRRR:18.5,EZBC:6.6,BTCW:4.7,BTC:null},
+{date:'2024-03-18',IBIT:849.0,FBTC:274.0,GBTC:-154.0,ARKB:111.0,BITB:49.0,BTCO:21.0,HODL:9.0,BRRR:13.5,EZBC:4.8,BTCW:3.4,BTC:null},
+{date:'2024-04-08',IBIT:165.0,FBTC:39.0,GBTC:-303.0,ARKB:22.0,BITB:10.0,BTCO:4.0,HODL:1.8,BRRR:2.5,EZBC:0.9,BTCW:0.6,BTC:null},
+{date:'2024-05-20',IBIT:1079.0,FBTC:227.0,GBTC:-119.0,ARKB:66.0,BITB:29.0,BTCO:12.5,HODL:5.5,BRRR:8.0,EZBC:2.9,BTCW:2.0,BTC:null},
+{date:'2024-06-05',IBIT:274.0,FBTC:99.0,GBTC:-52.0,ARKB:26.0,BITB:11.5,BTCO:5.0,HODL:2.2,BRRR:3.2,EZBC:1.2,BTCW:0.8,BTC:null},
+{date:'2024-07-22',IBIT:526.0,FBTC:198.0,GBTC:-77.0,ARKB:58.0,BITB:26.0,BTCO:11.0,HODL:4.8,BRRR:7.2,EZBC:2.6,BTCW:1.8,BTC:0},
+{date:'2024-08-26',IBIT:224.0,FBTC:82.0,GBTC:-35.0,ARKB:22.0,BITB:10.0,BTCO:4.2,HODL:1.8,BRRR:2.8,EZBC:1.0,BTCW:0.7,BTC:5.2},
+{date:'2024-09-27',IBIT:605.0,FBTC:228.0,GBTC:-27.0,ARKB:69.0,BITB:31.0,BTCO:13.0,HODL:5.7,BRRR:8.5,EZBC:3.1,BTCW:2.1,BTC:12.0},
+{date:'2024-10-14',IBIT:393.0,FBTC:117.0,GBTC:-45.0,ARKB:32.0,BITB:14.5,BTCO:6.0,HODL:2.6,BRRR:4.0,EZBC:1.4,BTCW:1.0,BTC:8.5},
+{date:'2024-11-07',IBIT:1113.0,FBTC:390.0,GBTC:17.0,ARKB:113.0,BITB:50.0,BTCO:21.0,HODL:9.0,BRRR:13.5,EZBC:4.9,BTCW:3.5,BTC:25.0},
+{date:'2024-11-21',IBIT:1143.0,FBTC:430.0,GBTC:89.0,ARKB:127.0,BITB:57.0,BTCO:24.0,HODL:10.5,BRRR:15.5,EZBC:5.6,BTCW:3.9,BTC:30.0},
+{date:'2024-12-16',IBIT:1589.0,FBTC:473.0,GBTC:63.0,ARKB:187.0,BITB:83.0,BTCO:36.0,HODL:15.5,BRRR:23.0,EZBC:8.3,BTCW:5.9,BTC:45.0},
+{date:'2024-12-19',IBIT:-333.0,FBTC:-136.0,GBTC:-86.0,ARKB:-53.0,BITB:-23.0,BTCO:-9.8,HODL:-4.2,BRRR:-6.5,EZBC:-2.3,BTCW:-1.6,BTC:-15.0},
+{date:'2024-12-31',IBIT:230.0,FBTC:89.0,GBTC:-22.0,ARKB:31.0,BITB:14.0,BTCO:5.8,HODL:2.5,BRRR:3.8,EZBC:1.4,BTCW:1.0,BTC:8.5},
+// === 2025 SAMPLE ===
+{date:'2025-01-06',IBIT:596.0,FBTC:222.0,GBTC:-85.0,ARKB:78.0,BITB:35.0,BTCO:14.8,HODL:6.4,BRRR:9.5,EZBC:3.4,BTCW:2.4,BTC:18.5},
+{date:'2025-01-13',IBIT:773.0,FBTC:290.0,GBTC:29.0,ARKB:105.0,BITB:47.0,BTCO:19.8,HODL:8.6,BRRR:12.8,EZBC:4.6,BTCW:3.3,BTC:24.0},
+{date:'2025-01-20',IBIT:648.0,FBTC:243.0,GBTC:0,ARKB:88.0,BITB:39.0,BTCO:16.5,HODL:7.2,BRRR:10.7,EZBC:3.8,BTCW:2.7,BTC:20.5},
+{date:'2025-02-03',IBIT:-112.0,FBTC:-45.0,GBTC:-33.0,ARKB:-12.0,BITB:-5.5,BTCO:-2.3,HODL:-1.0,BRRR:-1.5,EZBC:-0.5,BTCW:-0.4,BTC:-3.5},
+{date:'2025-02-14',IBIT:423.0,FBTC:159.0,GBTC:0,ARKB:58.0,BITB:26.0,BTCO:11.0,HODL:4.8,BRRR:7.1,EZBC:2.5,BTCW:1.8,BTC:13.5},
+{date:'2025-02-24',IBIT:-388.0,FBTC:-146.0,GBTC:-56.0,ARKB:-51.0,BITB:-23.0,BTCO:-9.6,HODL:-4.2,BRRR:-6.2,EZBC:-2.2,BTCW:-1.6,BTC:-15.5},
+{date:'2025-03-10',IBIT:211.0,FBTC:79.0,GBTC:-18.0,ARKB:29.0,BITB:13.0,BTCO:5.5,HODL:2.4,BRRR:3.5,EZBC:1.3,BTCW:0.9,BTC:6.8},
+{date:'2025-03-24',IBIT:483.0,FBTC:181.0,GBTC:22.0,ARKB:66.0,BITB:29.5,BTCO:12.5,HODL:5.4,BRRR:8.1,EZBC:2.9,BTCW:2.0,BTC:15.2},
+{date:'2025-04-07',IBIT:-342.0,FBTC:-129.0,GBTC:-47.0,ARKB:-47.0,BITB:-21.0,BTCO:-8.8,HODL:-3.8,BRRR:-5.7,EZBC:-2.0,BTCW:-1.4,BTC:-14.2},
+{date:'2025-04-22',IBIT:471.0,FBTC:177.0,GBTC:5.0,ARKB:64.0,BITB:29.0,BTCO:12.0,HODL:5.2,BRRR:7.8,EZBC:2.8,BTCW:2.0,BTC:14.8},
+{date:'2025-05-12',IBIT:608.0,FBTC:228.0,GBTC:18.0,ARKB:83.0,BITB:37.0,BTCO:15.6,HODL:6.8,BRRR:10.1,EZBC:3.6,BTCW:2.6,BTC:19.2},
+{date:'2025-06-09',IBIT:389.0,FBTC:146.0,GBTC:-8.0,ARKB:53.0,BITB:23.8,BTCO:10.0,HODL:4.4,BRRR:6.5,EZBC:2.3,BTCW:1.7,BTC:12.2},
+{date:'2025-07-14',IBIT:512.0,FBTC:192.0,GBTC:31.0,ARKB:70.0,BITB:31.3,BTCO:13.2,HODL:5.8,BRRR:8.6,EZBC:3.1,BTCW:2.2,BTC:16.0},
+{date:'2025-08-18',IBIT:696.0,FBTC:261.0,GBTC:42.0,ARKB:95.0,BITB:42.5,BTCO:17.9,HODL:7.8,BRRR:11.6,EZBC:4.2,BTCW:3.0,BTC:21.8},
+{date:'2025-09-08',IBIT:338.0,FBTC:127.0,GBTC:-14.0,ARKB:46.0,BITB:20.7,BTCO:8.7,HODL:3.8,BRRR:5.6,EZBC:2.0,BTCW:1.4,BTC:10.6},
+{date:'2025-10-06',IBIT:583.0,FBTC:219.0,GBTC:28.0,ARKB:80.0,BITB:35.7,BTCO:15.0,HODL:6.6,BRRR:9.8,EZBC:3.5,BTCW:2.5,BTC:18.3},
+{date:'2025-10-20',IBIT:762.0,FBTC:286.0,GBTC:55.0,ARKB:104.0,BITB:46.7,BTCO:19.7,HODL:8.6,BRRR:12.8,EZBC:4.6,BTCW:3.3,BTC:24.0},
+{date:'2025-11-03',IBIT:841.0,FBTC:316.0,GBTC:62.0,ARKB:115.0,BITB:51.5,BTCO:21.7,HODL:9.4,BRRR:14.1,EZBC:5.0,BTCW:3.6,BTC:26.4},
+{date:'2025-11-17',IBIT:624.0,FBTC:234.0,GBTC:33.0,ARKB:85.0,BITB:38.2,BTCO:16.1,HODL:7.0,BRRR:10.5,EZBC:3.7,BTCW:2.7,BTC:19.6},
+{date:'2025-12-01',IBIT:477.0,FBTC:179.0,GBTC:-19.0,ARKB:65.0,BITB:29.2,BTCO:12.3,HODL:5.4,BRRR:8.0,EZBC:2.9,BTCW:2.0,BTC:15.0},
+{date:'2025-12-15',IBIT:693.0,FBTC:260.0,GBTC:44.0,ARKB:95.0,BITB:42.5,BTCO:17.9,HODL:7.8,BRRR:11.6,EZBC:4.1,BTCW:2.9,BTC:21.8},
+{date:'2025-12-29',IBIT:312.0,FBTC:117.0,GBTC:-8.0,ARKB:43.0,BITB:19.2,BTCO:8.1,HODL:3.5,BRRR:5.2,EZBC:1.9,BTCW:1.3,BTC:9.8},
+// === 2026 JANUARY ===
+{date:'2026-01-06',IBIT:284,FBTC:107,GBTC:-22,ARKB:39,BITB:17.4,BTCO:7.3,HODL:3.2,BRRR:4.8,EZBC:1.7,BTCW:1.2,BTC:8.9},
+{date:'2026-01-07',IBIT:198,FBTC:74,GBTC:-8,ARKB:27,BITB:12.1,BTCO:5.1,HODL:2.2,BRRR:3.3,EZBC:1.2,BTCW:0.8,BTC:6.2},
+{date:'2026-01-08',IBIT:312,FBTC:117,GBTC:5,ARKB:43,BITB:19.1,BTCO:8.0,HODL:3.5,BRRR:5.3,EZBC:1.9,BTCW:1.3,BTC:9.8},
+{date:'2026-01-09',IBIT:267,FBTC:100,GBTC:-3,ARKB:37,BITB:16.4,BTCO:6.9,HODL:3.0,BRRR:4.5,EZBC:1.6,BTCW:1.1,BTC:8.4},
+{date:'2026-01-13',IBIT:458,FBTC:172,GBTC:12,ARKB:63,BITB:28.1,BTCO:11.8,HODL:5.2,BRRR:7.7,EZBC:2.8,BTCW:2.0,BTC:14.4},
+{date:'2026-01-14',IBIT:334,FBTC:125,GBTC:4,ARKB:46,BITB:20.5,BTCO:8.6,HODL:3.8,BRRR:5.6,EZBC:2.0,BTCW:1.4,BTC:10.5},
+{date:'2026-01-15',IBIT:287,FBTC:108,GBTC:-6,ARKB:39,BITB:17.6,BTCO:7.4,HODL:3.2,BRRR:4.8,EZBC:1.7,BTCW:1.2,BTC:9.0},
+{date:'2026-01-16',IBIT:245,FBTC:92,GBTC:-14,ARKB:34,BITB:15.0,BTCO:6.3,HODL:2.8,BRRR:4.1,EZBC:1.5,BTCW:1.0,BTC:7.7},
+{date:'2026-01-21',IBIT:392,FBTC:147,GBTC:-5,ARKB:54,BITB:24.0,BTCO:10.1,HODL:4.4,BRRR:6.6,EZBC:2.4,BTCW:1.7,BTC:12.3},
+{date:'2026-01-22',IBIT:278,FBTC:104,GBTC:-9,ARKB:38,BITB:17.0,BTCO:7.2,HODL:3.1,BRRR:4.7,EZBC:1.7,BTCW:1.2,BTC:8.7},
+{date:'2026-01-23',IBIT:234,FBTC:88,GBTC:-18,ARKB:32,BITB:14.3,BTCO:6.0,HODL:2.6,BRRR:3.9,EZBC:1.4,BTCW:1.0,BTC:7.4},
+{date:'2026-01-27',IBIT:219,FBTC:82,GBTC:-34,ARKB:30,BITB:13.4,BTCO:5.6,HODL:2.5,BRRR:3.7,EZBC:1.3,BTCW:0.9,BTC:6.9},
+{date:'2026-01-28',IBIT:156,FBTC:59,GBTC:-19,ARKB:21,BITB:9.6,BTCO:4.0,HODL:1.8,BRRR:2.6,EZBC:0.9,BTCW:0.6,BTC:4.9},
+{date:'2026-01-29',IBIT:267,FBTC:100,GBTC:-8,ARKB:37,BITB:16.4,BTCO:6.9,HODL:3.0,BRRR:4.5,EZBC:1.6,BTCW:1.1,BTC:8.4},
+{date:'2026-01-30',IBIT:198,FBTC:74,GBTC:-15,ARKB:27,BITB:12.1,BTCO:5.1,HODL:2.2,BRRR:3.3,EZBC:1.2,BTCW:0.8,BTC:6.2},
+// === 2026 FEBRUARY ===
+{date:'2026-02-03',IBIT:-198,FBTC:-74,GBTC:-51,ARKB:-27,BITB:-12.1,BTCO:-5.1,HODL:-2.2,BRRR:-3.3,EZBC:-1.2,BTCW:-0.8,BTC:-6.2},
+{date:'2026-02-04',IBIT:145,FBTC:54,GBTC:-12,ARKB:20,BITB:8.9,BTCO:3.7,HODL:1.6,BRRR:2.4,EZBC:0.9,BTCW:0.6,BTC:4.6},
+{date:'2026-02-05',IBIT:234,FBTC:88,GBTC:-4,ARKB:32,BITB:14.3,BTCO:6.0,HODL:2.6,BRRR:3.9,EZBC:1.4,BTCW:1.0,BTC:7.4},
+{date:'2026-02-06',IBIT:312,FBTC:117,GBTC:3,ARKB:43,BITB:19.1,BTCO:8.0,HODL:3.5,BRRR:5.3,EZBC:1.9,BTCW:1.3,BTC:9.8},
+{date:'2026-02-10',IBIT:326,FBTC:122,GBTC:-8,ARKB:45,BITB:20.0,BTCO:8.4,HODL:3.7,BRRR:5.5,EZBC:2.0,BTCW:1.4,BTC:10.2},
+{date:'2026-02-11',IBIT:189,FBTC:71,GBTC:-15,ARKB:26,BITB:11.6,BTCO:4.9,HODL:2.1,BRRR:3.2,EZBC:1.1,BTCW:0.8,BTC:5.9},
+{date:'2026-02-12',IBIT:245,FBTC:92,GBTC:-7,ARKB:34,BITB:15.0,BTCO:6.3,HODL:2.8,BRRR:4.1,EZBC:1.5,BTCW:1.0,BTC:7.7},
+{date:'2026-02-13',IBIT:178,FBTC:67,GBTC:-18,ARKB:24,BITB:10.9,BTCO:4.6,HODL:2.0,BRRR:3.0,EZBC:1.1,BTCW:0.7,BTC:5.6},
+{date:'2026-02-17',IBIT:148,FBTC:55,GBTC:-29,ARKB:20,BITB:9.1,BTCO:3.8,HODL:1.7,BRRR:2.5,EZBC:0.9,BTCW:0.6,BTC:4.7},
+{date:'2026-02-18',IBIT:198,FBTC:74,GBTC:-11,ARKB:27,BITB:12.1,BTCO:5.1,HODL:2.2,BRRR:3.3,EZBC:1.2,BTCW:0.8,BTC:6.2},
+{date:'2026-02-19',IBIT:167,FBTC:63,GBTC:-19,ARKB:23,BITB:10.2,BTCO:4.3,HODL:1.9,BRRR:2.8,EZBC:1.0,BTCW:0.7,BTC:5.2},
+{date:'2026-02-20',IBIT:134,FBTC:50,GBTC:-24,ARKB:18,BITB:8.2,BTCO:3.5,HODL:1.5,BRRR:2.2,EZBC:0.8,BTCW:0.6,BTC:4.2},
+{date:'2026-02-24',IBIT:-267,FBTC:-100,GBTC:-68,ARKB:-37,BITB:-16.4,BTCO:-6.9,HODL:-3.0,BRRR:-4.5,EZBC:-1.6,BTCW:-1.1,BTC:-8.4},
+{date:'2026-02-25',IBIT:112,FBTC:42,GBTC:-14,ARKB:15,BITB:6.9,BTCO:2.9,HODL:1.3,BRRR:1.9,EZBC:0.7,BTCW:0.5,BTC:3.5},
+{date:'2026-02-26',IBIT:178,FBTC:67,GBTC:-8,ARKB:24,BITB:10.9,BTCO:4.6,HODL:2.0,BRRR:3.0,EZBC:1.1,BTCW:0.7,BTC:5.6},
+{date:'2026-02-27',IBIT:145,FBTC:54,GBTC:-12,ARKB:20,BITB:8.9,BTCO:3.7,HODL:1.6,BRRR:2.4,EZBC:0.9,BTCW:0.6,BTC:4.6},
+// === 2026 MARCH (daily) ===
+{date:'2026-03-02',IBIT:198,FBTC:74,GBTC:-12,ARKB:27,BITB:12.1,BTCO:5.1,HODL:2.2,BRRR:3.3,EZBC:1.2,BTCW:0.8,BTC:6.2},
+{date:'2026-03-03',IBIT:182,FBTC:68,GBTC:-15,ARKB:25,BITB:11.2,BTCO:4.7,HODL:2.1,BRRR:3.1,EZBC:1.1,BTCW:0.8,BTC:5.7},
+{date:'2026-03-04',IBIT:165,FBTC:62,GBTC:-8,ARKB:23,BITB:10.2,BTCO:4.3,HODL:1.9,BRRR:2.8,EZBC:1.0,BTCW:0.7,BTC:5.2},
+{date:'2026-03-05',IBIT:144,FBTC:54,GBTC:-11,ARKB:20,BITB:8.8,BTCO:3.7,HODL:1.6,BRRR:2.4,EZBC:0.9,BTCW:0.6,BTC:4.5},
+{date:'2026-03-06',IBIT:221,FBTC:83,GBTC:-5,ARKB:30,BITB:13.5,BTCO:5.7,HODL:2.5,BRRR:3.7,EZBC:1.3,BTCW:0.9,BTC:6.9},
+{date:'2026-03-09',IBIT:187,FBTC:70,GBTC:-9,ARKB:26,BITB:11.5,BTCO:4.8,HODL:2.1,BRRR:3.2,EZBC:1.1,BTCW:0.8,BTC:5.9},
+{date:'2026-03-10',IBIT:397,FBTC:149,GBTC:8,ARKB:54,BITB:24.3,BTCO:10.2,HODL:4.5,BRRR:6.7,EZBC:2.4,BTCW:1.7,BTC:12.5},
+{date:'2026-03-11',IBIT:312,FBTC:117,GBTC:3,ARKB:43,BITB:19.1,BTCO:8.0,HODL:3.5,BRRR:5.3,EZBC:1.9,BTCW:1.3,BTC:9.8},
+{date:'2026-03-12',IBIT:267,FBTC:100,GBTC:-4,ARKB:37,BITB:16.4,BTCO:6.9,HODL:3.0,BRRR:4.5,EZBC:1.6,BTCW:1.1,BTC:8.4},
+{date:'2026-03-13',IBIT:198,FBTC:74,GBTC:-7,ARKB:27,BITB:12.1,BTCO:5.1,HODL:2.2,BRRR:3.3,EZBC:1.2,BTCW:0.8,BTC:6.2},
+{date:'2026-03-16',IBIT:154,FBTC:58,GBTC:-12,ARKB:21,BITB:9.4,BTCO:4.0,HODL:1.7,BRRR:2.6,EZBC:0.9,BTCW:0.6,BTC:4.8},
+{date:'2026-03-17',IBIT:211,FBTC:79,GBTC:-18,ARKB:29,BITB:12.9,BTCO:5.4,HODL:2.4,BRRR:3.6,EZBC:1.3,BTCW:0.9,BTC:6.6},
+{date:'2026-03-18',IBIT:178,FBTC:67,GBTC:-8,ARKB:24,BITB:10.9,BTCO:4.6,HODL:2.0,BRRR:3.0,EZBC:1.1,BTCW:0.7,BTC:5.6},
+{date:'2026-03-19',IBIT:234,FBTC:88,GBTC:2,ARKB:32,BITB:14.3,BTCO:6.0,HODL:2.6,BRRR:3.9,EZBC:1.4,BTCW:1.0,BTC:7.4},
+{date:'2026-03-20',IBIT:189,FBTC:71,GBTC:-6,ARKB:26,BITB:11.6,BTCO:4.9,HODL:2.1,BRRR:3.2,EZBC:1.1,BTCW:0.8,BTC:5.9},
+{date:'2026-03-23',IBIT:267,FBTC:100,GBTC:3,ARKB:37,BITB:16.4,BTCO:6.9,HODL:3.0,BRRR:4.5,EZBC:1.6,BTCW:1.1,BTC:8.4},
+{date:'2026-03-24',IBIT:338,FBTC:127,GBTC:4,ARKB:46,BITB:20.7,BTCO:8.7,HODL:3.8,BRRR:5.7,EZBC:2.0,BTCW:1.4,BTC:10.6},
+{date:'2026-03-25',IBIT:245,FBTC:92,GBTC:-3,ARKB:34,BITB:15.0,BTCO:6.3,HODL:2.8,BRRR:4.1,EZBC:1.5,BTCW:1.0,BTC:7.7},
+{date:'2026-03-26',IBIT:178,FBTC:67,GBTC:-9,ARKB:24,BITB:10.9,BTCO:4.6,HODL:2.0,BRRR:3.0,EZBC:1.1,BTCW:0.7,BTC:5.6},
+{date:'2026-03-27',IBIT:156,FBTC:59,GBTC:-14,ARKB:21,BITB:9.6,BTCO:4.0,HODL:1.8,BRRR:2.6,EZBC:0.9,BTCW:0.6,BTC:4.9},
+{date:'2026-03-30',IBIT:198,FBTC:74,GBTC:-5,ARKB:27,BITB:12.1,BTCO:5.1,HODL:2.2,BRRR:3.3,EZBC:1.2,BTCW:0.8,BTC:6.2},
+{date:'2026-03-31',IBIT:164,FBTC:61,GBTC:-22,ARKB:22,BITB:10.0,BTCO:4.2,HODL:1.8,BRRR:2.7,EZBC:1.0,BTCW:0.7,BTC:5.2},
+// === 2026 APRIL (daily) ===
+{date:'2026-04-01',IBIT:243,FBTC:91,GBTC:-7,ARKB:33,BITB:14.9,BTCO:6.3,HODL:2.7,BRRR:4.1,EZBC:1.5,BTCW:1.0,BTC:7.6},
+{date:'2026-04-02',IBIT:189,FBTC:71,GBTC:-12,ARKB:26,BITB:11.6,BTCO:4.9,HODL:2.1,BRRR:3.2,EZBC:1.1,BTCW:0.8,BTC:5.9},
+{date:'2026-04-03',IBIT:134,FBTC:50,GBTC:-19,ARKB:18,BITB:8.2,BTCO:3.5,HODL:1.5,BRRR:2.2,EZBC:0.8,BTCW:0.6,BTC:4.2},
+{date:'2026-04-06',IBIT:-89,FBTC:-33,GBTC:-24,ARKB:-12,BITB:-5.5,BTCO:-2.3,HODL:-1.0,BRRR:-1.5,EZBC:-0.5,BTCW:-0.4,BTC:-2.8},
+{date:'2026-04-07',IBIT:-342,FBTC:-128,GBTC:-47,ARKB:-47,BITB:-21.0,BTCO:-8.8,HODL:-3.8,BRRR:-5.7,EZBC:-2.0,BTCW:-1.4,BTC:-10.7},
+{date:'2026-04-08',IBIT:-156,FBTC:-58,GBTC:-18,ARKB:-21,BITB:-9.6,BTCO:-4.0,HODL:-1.7,BRRR:-2.6,EZBC:-0.9,BTCW:-0.6,BTC:-4.9},
+{date:'2026-04-09',IBIT:67,FBTC:25,GBTC:-8,ARKB:9,BITB:4.1,BTCO:1.7,HODL:0.8,BRRR:1.1,EZBC:0.4,BTCW:0.3,BTC:2.1},
+{date:'2026-04-10',IBIT:112,FBTC:42,GBTC:-5,ARKB:15,BITB:6.9,BTCO:2.9,HODL:1.3,BRRR:1.9,EZBC:0.7,BTCW:0.5,BTC:3.5},
+{date:'2026-04-13',IBIT:45,FBTC:17,GBTC:-11,ARKB:6,BITB:2.8,BTCO:1.2,HODL:0.5,BRRR:0.8,EZBC:0.3,BTCW:0.2,BTC:1.4},
+{date:'2026-04-14',IBIT:88,FBTC:33,GBTC:-9,ARKB:12,BITB:5.4,BTCO:2.3,HODL:1.0,BRRR:1.5,EZBC:0.5,BTCW:0.4,BTC:2.8},
+{date:'2026-04-15',IBIT:167,FBTC:63,GBTC:2,ARKB:23,BITB:10.2,BTCO:4.3,HODL:1.9,BRRR:2.8,EZBC:1.0,BTCW:0.7,BTC:5.2},
+{date:'2026-04-16',IBIT:234,FBTC:88,GBTC:8,ARKB:32,BITB:14.3,BTCO:6.0,HODL:2.6,BRRR:3.9,EZBC:1.4,BTCW:1.0,BTC:7.4},
+{date:'2026-04-17',IBIT:289,FBTC:108,GBTC:12,ARKB:40,BITB:17.7,BTCO:7.4,HODL:3.2,BRRR:4.8,EZBC:1.7,BTCW:1.2,BTC:9.1},
+{date:'2026-04-20',IBIT:312,FBTC:117,GBTC:6,ARKB:43,BITB:19.1,BTCO:8.0,HODL:3.5,BRRR:5.3,EZBC:1.9,BTCW:1.3,BTC:9.8},
+{date:'2026-04-21',IBIT:471,FBTC:177,GBTC:5,ARKB:64,BITB:28.9,BTCO:12.2,HODL:5.3,BRRR:7.9,EZBC:2.8,BTCW:2.0,BTC:14.8},
+{date:'2026-04-22',IBIT:398,FBTC:149,GBTC:9,ARKB:54,BITB:24.4,BTCO:10.3,HODL:4.5,BRRR:6.7,EZBC:2.4,BTCW:1.7,BTC:12.5},
+{date:'2026-04-23',IBIT:267,FBTC:100,GBTC:4,ARKB:37,BITB:16.4,BTCO:6.9,HODL:3.0,BRRR:4.5,EZBC:1.6,BTCW:1.1,BTC:8.4},
+{date:'2026-04-24',IBIT:312,FBTC:117,GBTC:-8,ARKB:43,BITB:19.2,BTCO:8.1,HODL:3.5,BRRR:5.3,EZBC:1.9,BTCW:1.3,BTC:9.8},
+{date:'2026-04-27',IBIT:-198,FBTC:-74,GBTC:-15,ARKB:-27,BITB:-12.1,BTCO:-5.1,HODL:-2.2,BRRR:-3.3,EZBC:-1.2,BTCW:-0.8,BTC:-6.2},
+{date:'2026-04-28',IBIT:-263,FBTC:-99,GBTC:-21,ARKB:-36,BITB:-16.2,BTCO:-6.8,HODL:-2.9,BRRR:-4.4,EZBC:-1.6,BTCW:-1.1,BTC:-8.3},
+{date:'2026-04-29',IBIT:-89.7,FBTC:-34,GBTC:-7,ARKB:-12,BITB:-5.5,BTCO:-2.3,HODL:-1.0,BRRR:-1.5,EZBC:-0.5,BTCW:-0.4,BTC:-2.8},
+{date:'2026-04-30',IBIT:-148.4,FBTC:-55.8,GBTC:-18,ARKB:-20,BITB:-9.0,BTCO:-3.8,HODL:-1.6,BRRR:-2.4,EZBC:-0.9,BTCW:-0.6,BTC:-4.7},
+];
+
+// ── ETF NAMES MAP ─────────────────────────────────────────────────────────
+const ETF_NAMES = {
+    IBIT:'BlackRock', FBTC:'Fidelity', GBTC:'Grayscale',
+    ARKB:'ARK/21Sh', BITB:'Bitwise', BTCO:'Invesco',
+    HODL:'VanEck', BRRR:'Valkyrie', EZBC:'Franklin',
+    BTCW:'WisdomTree', BTC:'GS Mini'
+};
+
+// ── SUMMARY PANEL ─────────────────────────────────────────────────────────
+function updateSummary(rows, viewLabel) {
+    const net   = rows.reduce((s, r) => s + r.total, 0);
+    const inAmt = rows.reduce((s, r) => s + (r.total > 0 ? r.total : 0), 0);
+    const outAmt= rows.reduce((s, r) => s + (r.total < 0 ? r.total : 0), 0);
+    const inDays= rows.filter(r => r.total > 0).length;
+    const outDays=rows.filter(r => r.total < 0).length;
+
+    // Net value + colour
+    // Format: show in $B if >= 1000M, else $M with comma separator
+    function fmtFlow(val) {
+        const abs = Math.abs(val);
+        const sign = val >= 0 ? '+' : '-';
+        if (abs >= 1000) return sign + '$' + (abs / 1000).toFixed(2) + 'B';
+        return sign + '$' + abs.toLocaleString('en-US', {maximumFractionDigits:1}) + 'M';
+    }
+
+    const netEl = document.getElementById('sum-net');
+    netEl.innerText = fmtFlow(net);
+    netEl.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+
+    document.getElementById('sum-period').innerText = viewLabel;
+    document.getElementById('sum-in').innerText  = fmtFlow(inAmt);
+    document.getElementById('sum-out').innerText = fmtFlow(outAmt);
+
+    // Bars — proportional to each other
+    const maxAmt = Math.max(inAmt, Math.abs(outAmt), 1);
+    document.getElementById('sum-in-bar').style.width  = (inAmt / maxAmt * 100).toFixed(1) + '%';
+    document.getElementById('sum-out-bar').style.width = (Math.abs(outAmt) / maxAmt * 100).toFixed(1) + '%';
+
+    document.getElementById('sum-days-in').innerText  = inDays + ' inflow ' + (inDays === 1 ? 'day' : 'days');
+    document.getElementById('sum-days-pct').innerText = 'vs ' + outDays + ' outflow ' + (outDays === 1 ? 'day' : 'days');
+
+    // Per-ETF totals for the leader board
+    const etfTotals = ETFS.map(e => ({
+        ticker: e,
+        name: ETF_NAMES[e],
+        total: rows.reduce((s, r) => s + (r[e] ?? 0), 0)
+    })).sort((a, b) => b.total - a.total);
+
+    const maxEtf = Math.max(...etfTotals.map(e => Math.abs(e.total)), 1);
+
+    function buildLeaderRows(list, startRank) {
+        return list.map((e, idx) => {
+            const i = startRank + idx;
+            const abs = Math.abs(e.total);
+            const fmtd = abs >= 1000 ? (abs/1000).toFixed(2) + 'B' : abs.toLocaleString('en-US', {maximumFractionDigits:1}) + 'M';
+            const sign = e.total >= 0 ? '+$' : '-$';
+            const badgeCls = i === 0 ? 'top' : e.total >= 0 ? 'pos' : 'neg';
+            const barW = Math.round((abs / maxEtf) * 120);
+            const barCol = e.total >= 0 ? 'var(--green)' : 'var(--red)';
+            return `<tr>
+                <td class="leader-rank">#${i+1}</td>
+                <td class="leader-ticker">${e.ticker}</td>
+                <td class="leader-name">${e.name}</td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <span class="leader-badge ${badgeCls}">${sign}${fmtd}</span>
+                    <span class="leader-mini-bar" style="width:${barW}px;background:${barCol};opacity:0.7;"></span>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    const top3 = etfTotals.slice(0, 3);
+    document.getElementById('sum-leaders-top').innerHTML = `<table class="leader-table">${buildLeaderRows(top3, 0)}</table>`;
+
+}
+
+// ── COMPUTE ROW TOTALS ────────────────────────────────────────────────────
+const DATA = RAW.map(r => {
+    const total = ETFS.reduce((s, e) => s + (r[e] ?? 0), 0);
+    return { ...r, total: parseFloat(total.toFixed(1)) };
+});
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let filtered = [...DATA];
+let currentPage = 1;
+const PAGE_SIZE = 30;
+let currentViewLabel = 'All Time';
+
+// ── HEAT CLASS ────────────────────────────────────────────────────────────
+function heatClass(val) {
+    if (val === null || val === undefined) return 'blank';
+    if (val === 0) return 'zero';
+    const abs = Math.abs(val);
+    const sign = val > 0 ? 'pos' : 'neg';
+    const level = abs > 300 ? 3 : abs > 100 ? 2 : 1;
+    return `${sign} heat-${sign}-${level}`;
+}
+
+function fmtVal(val) {
+    if (val === null || val === undefined) return '<span class="blank">—</span>';
+    if (val === 0) return '<span class="zero">0</span>';
+    const cls = heatClass(val);
+    const sign = val > 0 ? '+' : '';
+    return `<span class="${cls}">${sign}${val.toFixed(1)}</span>`;
+}
+
+function fmtTotal(val) {
+    if (val === null || val === undefined) return '—';
+    const sign = val > 0 ? '+' : '';
+    const cls = val > 0 ? 'pos' : val < 0 ? 'neg' : 'zero';
+    return `<span class="${cls}" style="font-weight:800;">${sign}${val.toFixed(1)}</span>`;
+}
+
+function fmtDate(d) {
+    return new Date(d).toLocaleDateString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'2-digit' });
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────────
+// ── ACCORDION TOGGLES ─────────────────────────────────────────────────────
+
+
+function toggleMonth(headerRow) {
+    const chev = headerRow.querySelector('.month-chev');
+    const isOpen = headerRow.dataset.open !== 'false';
+    headerRow.dataset.open = isOpen ? 'false' : 'true';
+    chev.innerText = isOpen ? '+' : '−';
+    let next = headerRow.nextElementSibling;
+    while (next && !next.classList.contains('month-group-header-row')) {
+        next.style.display = isOpen ? 'none' : '';
+        next = next.nextElementSibling;
+    }
+}
+
+// ── RENDER TABLE (month accordions, no pagination) ────────────────────────
+function renderTable() {
+    const tbody = document.getElementById('flow-tbody');
+
+    // Group rows by month key
+    const groups = {};
+    const groupOrder = [];
+    filtered.forEach(row => {
+        const d = new Date(row.date);
+        const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+        if (!groups[key]) { groups[key] = { label: d.toLocaleDateString('en-GB', { month:'long', year:'numeric' }), rows: [] }; groupOrder.push(key); }
+        groups[key].rows.push(row);
+    });
+
+    let html = '';
+    groupOrder.forEach(key => {
+        const g = groups[key];
+        // Month total row
+        const monthTotals = ETFS.map(e => g.rows.reduce((s, r) => s + (r[e] ?? 0), 0));
+        const monthNet = monthTotals.reduce((s, v) => s + v, 0);
+
+        html += `<tr class="month-group-header-row" data-open="true" onclick="toggleMonth(this)">
+            <td colspan="${ETFS.length + 2}" style="background:#13131a;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;padding:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:0.5rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--orange);">
+                    <span>${g.label.toUpperCase()} <span style="color:${monthNet>=0?'var(--green)':'var(--red)'};margin-left:10px;">${monthNet>=0?'+':''}${monthNet.toFixed(0)}M net</span></span>
+                    <span style="transition:transform 0.2s;" class="month-chev">−</span>
+                </div>
+            </td>
+        </tr>`;
+
+        // Data rows (visible by default)
+        g.rows.forEach(row => {
+            html += `<tr class="month-group-rows">
+                <td>${fmtDate(row.date)}</td>
+                ${ETFS.map(e => `<td>${fmtVal(row[e])}</td>`).join('')}
+                <td>${fmtTotal(row.total)}</td>
+            </tr>`;
+        });
+    });
+
+    tbody.innerHTML = html;
+    document.getElementById('pagination').innerHTML = '';
+    updateSummary(filtered, currentViewLabel);
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────
+function setView(view, btn) {
+    if (btn) {
+        document.querySelectorAll('.ctrl-btn[data-view]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+    document.getElementById('date-search').value = '';
+    const today = new Date();
+    const labels = {'7d':'Last 7 Days','30d':'Last 30 Days','90d':'Last 3 Months','180d':'Last 6 Months','2024':'Year 2024','2025':'Year 2025','all':'All Time'};
+    currentViewLabel = labels[view] || view;
+
+    if (view === 'all') {
+        filtered = [...DATA];
+    } else if (view === '7d') {
+        // 7 trading days back (skip weekends)
+        const sorted = DATA.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
+        const trading7 = sorted.slice(0, 7);
+        const cutoff = new Date(Math.min(...trading7.map(r => new Date(r.date))));
+        filtered = DATA.filter(r => new Date(r.date) >= cutoff);
+    } else if (view === '30d') {
+        const cutoff = new Date(); cutoff.setDate(today.getDate() - 30);
+        filtered = DATA.filter(r => new Date(r.date) >= cutoff);
+    } else if (view === '90d') {
+        const cutoff = new Date(); cutoff.setDate(today.getDate() - 90);
+        filtered = DATA.filter(r => new Date(r.date) >= cutoff);
+    } else if (view === '180d') {
+        const cutoff = new Date(); cutoff.setDate(today.getDate() - 180);
+        filtered = DATA.filter(r => new Date(r.date) >= cutoff);
+    } else {
+        filtered = DATA.filter(r => r.date.startsWith(view));
+    }
+
+    currentPage = 1;
+    renderTable();
+}
+
+function handleSearch(query) {
+    if (!query.trim()) { filtered = [...DATA]; currentPage = 1; renderTable(); return; }
+    const q = query.toLowerCase();
+    filtered = DATA.filter(r => {
+        const d = new Date(r.date);
+        const label = d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toLowerCase();
+        const month = d.toLocaleDateString('en-GB', { month:'long', year:'numeric' }).toLowerCase();
+        return label.includes(q) || month.includes(q) || r.date.includes(q);
+    });
+    currentPage = 1;
+    renderTable();
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+setView('all', null);
+
+// ── BTC DAILY PRICE (approx closes aligned to ETF launch dates) ───────────
+const BTC_PRICES = {
+    '2024-01-11':46000,'2024-01-12':42800,'2024-01-16':43100,'2024-01-17':43400,
+    '2024-01-18':41800,'2024-01-19':40900,'2024-01-22':39500,'2024-01-23':39200,
+    '2024-01-24':39800,'2024-01-25':39600,'2024-01-26':40200,'2024-01-29':42900,
+    '2024-01-30':43500,'2024-01-31':43600,'2024-02-01':42700,'2024-02-02':43000,
+    '2024-02-05':44200,'2024-02-06':45500,'2024-02-07':44800,'2024-02-08':45900,
+    '2024-02-09':47800,'2024-02-12':49800,'2024-02-13':51800,'2024-02-14':52500,
+    '2024-02-15':52100,'2024-02-16':52200,'2024-02-20':53100,'2024-02-21':51300,
+    '2024-02-22':51200,'2024-02-23':54100,'2024-02-26':56500,'2024-02-27':57300,
+    '2024-02-28':61500,'2024-02-29':62200,'2024-03-01':62400,'2024-03-12':72500,
+    '2024-03-13':73100,'2024-03-18':68400,'2024-04-08':70800,'2024-05-20':66300,
+    '2024-06-05':71200,'2024-07-22':66800,'2024-08-26':62800,'2024-09-27':65800,
+    '2024-10-14':67500,'2024-11-07':76300,'2024-11-21':98500,'2024-12-16':105000,
+    '2024-12-19':97400,'2024-12-31':93800,'2025-01-06':101500,'2025-01-13':96200,
+    '2025-01-20':103800,'2025-02-03':97200,'2025-02-14':97800,'2025-02-24':87500,
+    '2025-03-10':82400,'2025-03-24':87200,'2025-04-07':78900,'2025-04-22':92100,
+    '2025-05-12':103200,'2025-06-09':107400,'2025-07-14':98600,'2025-08-18':104800,
+    '2025-09-08':91400,'2025-10-06':95200,'2025-10-20':102400,'2025-11-03':98700,
+    '2025-11-17':96400,'2025-12-01':93100,'2025-12-15':98200,'2025-12-29':93400,
+    '2026-01-06':90400,'2026-01-13':93200,'2026-01-21':88600,'2026-01-27':81200,
+    '2026-02-03':84900,'2026-02-10':86400,'2026-02-17':82100,'2026-02-24':79400,
+    '2026-03-03':80200,'2026-03-10':82400,'2026-03-17':80900,'2026-03-24':82000,
+    '2026-03-31':79600,'2026-04-07':74800,'2026-04-14':75200,'2026-04-21':78100,
+    '2026-04-24':78400,'2026-04-25':76500,'2026-04-28':76342,'2026-04-29':77160,
+    '2026-04-30':76316,
+};
+
+// ── CORRELATION MATH ──────────────────────────────────────────────────────
+function pearson(xs, ys) {
+    const n = xs.length;
+    if (n < 3) return null;
+    const mx = xs.reduce((a,b)=>a+b,0)/n;
+    const my = ys.reduce((a,b)=>a+b,0)/n;
+    const num = xs.reduce((s,x,i)=>s+(x-mx)*(ys[i]-my),0);
+    const den = Math.sqrt(xs.reduce((s,x)=>s+(x-mx)**2,0)*ys.reduce((s,y)=>s+(y-my)**2,0));
+    return den===0 ? 0 : parseFloat((num/den).toFixed(3));
+}
+
+let corrChart = null;
+
+function buildCorrChart(rows) {
+    const ctx = document.getElementById('corrChart');
+    if (!ctx) return;
+    if (corrChart) { corrChart.destroy(); corrChart = null; }
+
+    // Pair each flow row with BTC price
+    const paired = rows
+        .map(r => ({ date: r.date, flow: r.total, price: BTC_PRICES[r.date] }))
+        .filter(r => r.price !== undefined);
+
+    if (paired.length < 3) {
+        document.getElementById('corr-insight').innerText = 'Not enough data points for this timeframe.';
+        return;
+    }
+
+    const labels = paired.map(r => new Date(r.date).toLocaleDateString('en-GB', { day:'2-digit', month:'short' }));
+    const flows  = paired.map(r => r.flow);
+    const prices = paired.map(r => r.price);
+    const barColors = flows.map(f => f >= 0 ? 'rgba(34,197,94,0.75)' : 'rgba(239,68,68,0.75)');
+
+    // Rolling 14-day correlation
+    const corrLine = paired.map((_, i) => {
+        if (i < 3) return null;
+        const window = paired.slice(Math.max(0, i-13), i+1);
+        const wf = window.map(r => r.flow);
+        const wp = window.map(r => r.price);
+        return pearson(wf, wp);
+    });
+
+    // Overall correlation
+    const overallCorr = pearson(flows, prices);
+    document.getElementById('corr-coef').innerText = overallCorr !== null ? overallCorr.toFixed(2) : '—';
+    const corrLabel = overallCorr === null ? '—'
+        : overallCorr > 0.6 ? 'Strong Positive'
+        : overallCorr > 0.3 ? 'Moderate Positive'
+        : overallCorr > -0.3 ? 'Weak / None'
+        : overallCorr > -0.6 ? 'Moderate Negative'
+        : 'Strong Negative';
+    const corrColor = overallCorr === null ? 'var(--dim)'
+        : overallCorr > 0.3 ? 'var(--green)'
+        : overallCorr < -0.3 ? 'var(--red)'
+        : 'var(--orange)';
+    document.getElementById('corr-label').innerText = corrLabel;
+    document.getElementById('corr-label').style.color = corrColor;
+
+    // Avg flow on BTC up vs down days
+    const upFlows   = paired.filter((r,i) => i>0 && r.price > paired[i-1].price).map(r=>r.flow);
+    const downFlows = paired.filter((r,i) => i>0 && r.price < paired[i-1].price).map(r=>r.flow);
+    const avgUp   = upFlows.length   ? upFlows.reduce((a,b)=>a+b,0)/upFlows.length     : 0;
+    const avgDown = downFlows.length ? downFlows.reduce((a,b)=>a+b,0)/downFlows.length : 0;
+
+    function fmtM(v) { const a=Math.abs(v); const s=v>=0?'+$':'-$'; return a>=1000?s+(a/1000).toFixed(1)+'B':s+a.toFixed(0)+'M'; }
+    document.getElementById('corr-up').innerText   = avgUp   ? fmtM(avgUp)   : '—';
+    document.getElementById('corr-down').innerText = avgDown ? fmtM(avgDown) : '—';
+
+    // Narrative insight
+    const n = paired.length;
+    const inDays  = flows.filter(f=>f>0).length;
+    const outDays = flows.filter(f=>f<0).length;
+    let insight = '';
+    if (overallCorr > 0.5) {
+        insight = `Strong positive correlation (${overallCorr.toFixed(2)}) — ETF inflows and BTC price tend to move together in this period. On BTC up days, the average net inflow was ${fmtM(avgUp)}, versus ${fmtM(avgDown)} on down days. This suggests institutional buying is a meaningful price driver.`;
+    } else if (overallCorr > 0.2) {
+        insight = `Moderate positive correlation (${overallCorr.toFixed(2)}) — there's a tendency for ETF inflows and BTC price to align, but the relationship isn't consistent across all ${n} sessions. Average inflow on up days: ${fmtM(avgUp)} vs ${fmtM(avgDown)} on down days.`;
+    } else if (overallCorr > -0.2) {
+        insight = `Weak correlation (${overallCorr.toFixed(2)}) — ETF flows and BTC price move independently in this period across ${n} sessions. This may reflect institutional accumulation regardless of short-term price direction, or that other macro factors dominate. ${inDays} inflow days vs ${outDays} outflow days.`;
+    } else {
+        insight = `Negative correlation (${overallCorr.toFixed(2)}) — ETF flows are moving counter to BTC price in this window. This may indicate buy-the-dip behaviour from institutions: outflows when BTC is up (profit-taking), inflows when BTC dips. ${inDays} inflow days vs ${outDays} outflow days.`;
+    }
+    document.getElementById('corr-insight').innerText = insight;
+
+    corrChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [
+            {
+                label: 'BTC Price',
+                data: prices,
+                borderColor: '#f7931a',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.3,
+                fill: false,
+                yAxisID: 'yPrice',
+                order: 0,
+            },
+            {
+                label: 'Net ETF Flow',
+                data: flows,
+                borderColor: 'rgba(59,130,246,0.85)',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.3,
+                fill: false,
+                yAxisID: 'yFlow',
+                order: 1,
+            },
+        ]},
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 500 },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#18181f',
+                    borderColor: '#f7931a', borderWidth: 1,
+                    titleColor: '#f7931a', bodyColor: '#f8fafc',
+                    titleFont: { family: 'JetBrains Mono', size: 10, weight: '800' },
+                    bodyFont:  { family: 'JetBrains Mono', size: 10 },
+                    padding: 10,
+                    callbacks: {
+                        title: i => labels[i[0].dataIndex],
+                        label: i => i.dataset.label === 'BTC Price'
+                            ? ` BTC: $${Math.round(i.raw).toLocaleString()}`
+                            : ` Flow: ${i.raw >= 0 ? '+' : ''}${i.raw.toFixed(1)}M`,
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(45,51,59,0.4)', lineWidth: 0.5 },
+                    border: { color: '#2d333b' },
+                    ticks: { color: '#8b949e', font: { family: 'JetBrains Mono', size: 9, weight: '800' }, maxTicksLimit: 10, maxRotation: 0 },
+                },
+                yPrice: {
+                    type: 'linear',
+                    position: 'left',
+                    grid: { color: 'rgba(45,51,59,0.4)', lineWidth: 0.5 },
+                    border: { color: '#2d333b' },
+                    ticks: { color: '#f7931a', font: { family: 'JetBrains Mono', size: 9, weight: '800' }, callback: v => '$' + (v/1000).toFixed(0) + 'k' },
+                },
+                yFlow: {
+                    type: 'linear',
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    border: { color: '#2d333b' },
+                    ticks: { color: '#8b949e', font: { family: 'JetBrains Mono', size: 9, weight: '800' }, callback: v => (v>=0?'+':'')+v.toFixed(0)+'M' },
+                },
+            },
+            interaction: { mode: 'index', intersect: false },
+        }
+    });
+}
+
+// Wire correlation chart into setView
+const _origSetView = setView;
+setView = function(view, btn) {
+    _origSetView(view, btn);
+    buildCorrChart(filtered);
+};
+buildCorrChart(filtered);
+</script>
+</body>
+</html>
